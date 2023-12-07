@@ -1,0 +1,40 @@
+project:    "Unixbench-5.9.1"  # 工程名称
+test_type:  "unixbench" 
+base_path:  "/root/kytuning/test/unixbench-test"
+log_file:   "{base_path}/kytuning.log"
+log_level:  "debug"
+
+tool_tgz:   "/root/kytuning/src/tools/UnixBench5.1.3-1.tar.gz"
+tool_dir:   "{base_path}/UnixBench5.1.3-1"
+tool_decompression:     "tar -xzvf {tool_tgz} -C {base_path}"
+
+maxiterations:  1
+
+
+rpm_list:
+    - "numactl"
+    - "jemalloc"
+
+configs:
+    - name:     "vm.swappiness" 
+      desc:     "the vm.swapiness" 
+      get :     "sysctl -a | grep vm.swappiness | awk '{print $3}'"
+      set :     "sysctl -w vm.swappiness={value}"
+      value:    20
+
+testcase:
+    clean:  "make spotless" 
+    build:  "make"
+    run:    "./Run -c 1"
+    schemeflag:     0
+    configs:
+        - name:     "kernel.sched_migration_cost_ns"
+          desc:     "context switch"
+          get :     "sysctl -n kernel.sched_migration_cost_ns"
+          set :     "sysctl -n kernel.sched_migration_cost_ns={value}"
+          type:     "continuous"
+          values:
+              - 100000
+              - 500000
+              - 100000
+          items:
