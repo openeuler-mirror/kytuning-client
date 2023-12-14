@@ -43,6 +43,28 @@ class Report(object):
         os.makedirs(self.current_raw_result_dir,exist_ok=False)
         self.current_report_file = self.current_result_dir     # +  "/kytuning-result.xlsx"
 
+    def get_log_save_dir(self):
+        """
+        获取日志保存路径   
+        :return 返回日志保存路径
+        """
+        return self.current_log_dir
+
+    def save_env_data(self,env_data):
+        """
+        保存初始环境信息
+        :param env_data      初始环境信息数据
+        :return 返回保存的初始化环境信息文件路径
+        """
+        file = open(self.current_env_file, 'w+')
+        file.write(env_data)
+        file.close()
+
+        # 保存环境信息到 xlsx 表格中
+        self.exportxlsx.export_env_to_xlsx(json.loads(env_data),self.current_report_file)
+
+        return self.current_env_file
+
     def save_opmodify_data(self,name,testinfo,data):
         '''
         环境调优修改信息保存        
@@ -117,6 +139,13 @@ class Report(object):
                             file_path,
                             self.current_report_file,exec_cmd,None)
         return file_path
+
+    def save_unixbench_detail(self, name, tinf, result):
+        path = '{tdir}/{name}'.format(tdir=self.current_result_dir, name=name)
+        jobj = { 'testinfo' : tinf, 'result' : result }
+        data = json.dumps(jobj)
+        with open(path, 'w+') as fp:
+            fp.write(data)
 
     
     def save_unixbench(self,name,testinfo,data):
@@ -244,3 +273,37 @@ if __name__ == '__main__':
 
     rep.save_env_data(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
     
+    # only test
+    file = open("./1.out",'r')
+    data = file.read()
+    file.close()
+    tname = 'Unixbench-5.9.1-kernel.sched_migration_cost_ns-0-0'
+    # testcase 示例
+    tinfo_str = '{\
+    "project": "Unixbench-5.9.1",\
+    "test_type": "Unixbench",\
+    "rpm_list": ["numactl", "jemalloc"],\
+    "configs": [{\
+        "name": "vm.swappiness",\
+        "desc": "the vm.swapiness",\
+        "setup": "sysctl -w vm.swappiness=20",\
+        "reset": "sysctl -w vm.swappiness=20"\
+    }],\
+    "testcase": {\
+        "name": "Unixbench-5.9.1-kernel.sched_migration_cost_ns-0",\
+        "build": "make",\
+        "clean": "make spotless",\
+        "run": "./Run -c 1",\
+        "configs": [{\
+            "name": "kernel.sched_migration_cost_ns",\
+            "desc": "context switch",\
+            "setup": "sysctl -n kernel.sched_migration_cost_ns=100000",\
+            "reset": "sysctl -n kernel.sched_migration_cost_ns=100000"\
+        }]\
+    }\
+    }'
+    tinfo = json.loads(tinfo_str)
+    # print(json.dumps(tinfo["configs"]))
+    # print(json.dumps(tinfo["testcase"]["configs"]))
+    # print(rep.dumps_configs(tinfo))
+    rep.save_unixbench(tname,tinfo,data)
