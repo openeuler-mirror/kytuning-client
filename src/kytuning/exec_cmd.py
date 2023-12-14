@@ -55,8 +55,30 @@ class ExecCmd(object):
         self.timeout = timeout
         self.muted = muted
 
+        if self.timeout:
+            self.stoptime = time.time() + timeout
+        else:
+            self.stoptime = sys.maxsize
+        if timeout is not None and timeout <= 0:
+            logger.error("Timeout reached not to spawn a task")
+            self.sp = None
+        else:
+            self.sp = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+                preexec_fn=os.setpgid(0, 0),
+                env=self.env)
+
 
     def save_output(self, isstdout):
+        data = self.read_output(isstdout)
+        if isstdout is True:
+            self.result.stdout = self.result.stdout + data
+        else:
+            self.result.stderr = self.result.stderr + data
+            self.result.stdout = self.result.stdout + data
 
 
     def run(self):
@@ -98,6 +120,27 @@ class ExecCmd(object):
             logging.debug(traceback.extract_stack())
 
         return self.result
+
+
+    def read_output(self, isstdout):
+        if isstdout:
+            pipe = self.sp.stdout
+        else:
+            pipe = self.sp.stderr
+
+        data = ""
+        while select.select([pipe], [], [], 0)[0]:
+            bufferline = pipe.readline()
+            try:
+                bufferline = bufferline.decode('utf-8')
+            except Exception:
+                bufferline = str(bufferline)
+            if bufferline == "":
+                break
+            data += bufferline
+
+        return data
+
 
     def __enter__(self):
         return self
