@@ -24,7 +24,7 @@ configs:
 
 testcase:
     clean:  "make spotless" 
-    build:  "make"
+    build:  "make clean && make"
     run:    "./Run -c 1"
     schemeflag:     0
     configs:
