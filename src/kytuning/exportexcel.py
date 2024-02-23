@@ -771,43 +771,48 @@ class Iozone(BenchMark):
             "block_size": "",
             "rw_items": ["写测试（KB/s）", "重写测试（KB/s）", "读测试（KB/s）",
                          "重读测试（KB/s）", "随机读测试（KB/s）", "随机写测试（KB/s）"]}
-        self.color_title = PatternFill()
-        self.font_title = Font(name="DejaVu Sans", size=20,
-                               bold=True, color="993366")
-        self.color_cmd = PatternFill()
-        self.font_cmd = Font(name="Linrial", size=18,
-                             bold=True, color="FF00FF")
-        self.color_cmd_value = PatternFill("solid", fgColor="DBDBDB")
-        self.font_cmd_value = Font(name="宋体", size=11)
-        self.color_item = [PatternFill(
-            "solid", fgColor="FFC000"), PatternFill("solid", fgColor="C6E0B4")]
-        self.font_item = [Font(name="宋体", size=14, bold=True, color="993366"), Font(
-            name="宋体", size=14, bold=True, color="993366")]
-        self.color_fsize = [PatternFill(
-            "solid", fgColor="AEAAAA"), PatternFill("solid", fgColor="BDD7EE")]
-        self.font_fsize = [Font(name="宋体", size=12), Font(name="宋体", size=12)]
-        self.color_data = [PatternFill(
-            "solid", fgColor="A9D08E"), PatternFill("solid", fgColor="FFE699")]
-        self.font_data = [Font(name="宋体", size=11), Font(name="宋体", size=11)]
+        self.cols_width = [self.ret_col_1_width/2, self.ret_col_2_width/2]
+
+    def set_row_header(self, sheet: Worksheet, row_point: int, record):
+        if row_point > sheet.max_row:
+            for idx in range(0, len(self.items['rw_items'])):
+                self.set_cell_style(sheet, row_point + idx, self.col_point_start, self.items['rw_items'][idx], self.alignment_center, self.color_item_1, self.font_item_1)
+                self.set_cell_style(sheet, row_point + idx, self.col_point_start + 1, record['文件大小'], self.alignment_center, self.color_item_2, self.font_item_2)
+                sheet.row_dimensions[row_point + idx].height = 30
+            self.merge_col_cell(sheet, utils.get_column_letter(self.col_point_start + 1), row_point, row_point + len(self.items['rw_items']) - 1)
+        pass
+
+    def find_row_point(self, sheet: Worksheet, record):
+        if sheet.max_row >= self.row_data_start:
+            for row in sheet.iter_rows(min_row = self.row_data_start):
+                if row[self.col_point_start - 1 + 1].value == record['文件大小']:
+                    return row[self.col_point_start - 1].row
+        return sheet.max_row + 1
 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name}
         with open(file, 'r') as f:
             lines = f.readlines()
         ret_dict['测试记录'] = []
-        for line in lines[28:-2]:
-            record = line.strip().split(' ')
-            while '' in record:
-                record.remove('')
-            ret_dict['测试记录'].append({
-                '文件大小': int(record[0]),
-                '块大小': int(record[1]),
-                '写测试（KB/s）': int(record[2]),
-                '重写测试（KB/s）': int(record[3]),
-                '读测试（KB/s）': int(record[4]),
-                '重读测试（KB/s）': int(record[5]),
-                '随机读测试（KB/s）': int(record[6]),
-                '随机写测试（KB/s）': int(record[7])})
+        find_result = False
+        for line in lines:
+            if find_result == False:
+                if line.strip()[0:2] == "kB":
+                    find_result = True
+            else:
+                record = line.strip().split(' ')
+                while '' in record:
+                    record.remove('')
+                ret_dict['测试记录'].append({
+                    '文件大小': int(record[0]),
+                    '块大小': int(record[1]),
+                    '写测试（KB/s）': int(record[2]),
+                    '重写测试（KB/s）': int(record[3]),
+                    '读测试（KB/s）': int(record[4]),
+                    '重读测试（KB/s）': int(record[5]),
+                    '随机读测试（KB/s）': int(record[6]),
+                    '随机写测试（KB/s）': int(record[7])})
+                break
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
