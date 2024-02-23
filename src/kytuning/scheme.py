@@ -8,6 +8,7 @@ import subprocess
 from subprocess import SubprocessError
 
 from .logger import log_init
+from .func import *
 
 __doc__ = """
 """
@@ -31,9 +32,9 @@ class SchemeParserError(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
-def subproc_call(command, timeout=None, check=False):
-    return subprocess.run(command, shell=True, 
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+def subproc_call(command, timeout=None, check=False, hide=False):
+    return subprocess.run(command, shell=True,  
+            stdout=None, stderr=None,
             encoding='utf-8', timeout=timeout, check=check)
 
 class TestConfig(object):
