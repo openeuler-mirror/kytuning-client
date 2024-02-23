@@ -96,6 +96,24 @@ class Report(object):
         file.close()
         return file_path
 
+    def save_result_data(self, name, data):
+        # 保存中间结果文件
+        file_path=self.current_raw_result_dir + "/" + name
+        file = open(file_path,'w+')
+        file.write(data)
+        file.close()
+        return file_path
+
+    def save_result_json(self, name, data):
+        # 保存中间结果文件
+        file_path=self.current_raw_result_dir + "/" + name + ".json"
+        file = open(file_path,'w+')
+        jd = json.dumps(data)
+        file.write(jd)
+        file.close()
+        return file_path
+
+
     def dumps_configs(self,testinfo):
         dumps_str=""
         global_configs = testinfo["configs"]
@@ -107,7 +125,7 @@ class Report(object):
             dumps_str = dumps_str + t_config["setup"] +'\r\n'
         return dumps_str
 
-    def save_result(self,name,testinfo,data):
+    def save_result(self,name,testinfo,data, only_xlsx = False):
         '''
         测试结果保存接口
         :param name          测试名称  
@@ -116,20 +134,30 @@ class Report(object):
         :return              测试结果保存路径
         '''
         # json1=json.loads(testinfo)
-        
-        # 保存中间结果文件
+
         file_path=self.current_raw_result_dir + "/" + name
-        file = open(file_path,'w+')
-        file.write(data)
-        file.close()
 
-        # 保存测试清单信息
-        self.save_testcase_data(name,testinfo)
-
-        # 将中间结果文件导入到 excel 表格中
         tool_name = testinfo["test_type"]
         exec_cmd = testinfo["testcase"]["run"]
         exec_configs= self.dumps_configs(testinfo)
+        if only_xlsx == False:
+            # 保存中间结果文件
+            self.save_result_data(name, data)
+
+            # 保存测试清单信息
+            self.save_testcase_data(name,testinfo)
+
+            # 保存json的结果数据
+            ret = self.exportxlsx.ret_to_dict(tool_name,
+                        file_path,exec_cmd,exec_configs)
+            print(ret)
+            self.save_result_json(name,ret)
+
+        # 将中间结果文件导入到 excel 表格中
+        #tool_name = testinfo["test_type"]
+        #exec_cmd = testinfo["testcase"]["run"]
+        #exec_configs= self.dumps_configs(testinfo)
+
         if(type(exec_configs)== str):
             self.exportxlsx.export_ret_to_xlsx(tool_name,
                             file_path,
