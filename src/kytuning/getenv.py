@@ -50,12 +50,15 @@ def base64_encode(s: str) -> str:
 
 class HardwareInfo:
     def __init__(self) -> None:
-        self.lshw = json.loads(exec_shell_cmd("lshw -json -quiet"))
+        try:
+            self.lshw = json.loads(exec_shell_cmd("lshw -json -quiet"))
         # -J: export json
         # -o List: specify custom column
-        self.lsblk = json.loads(exec_shell_cmd(
+            self.lsblk = json.loads(exec_shell_cmd(
             "lsblk -d -J -o NAME,TYPE,VENDOR,MODEL,SIZE,ROTA,SCHED,RQ-SIZE,TRAN"))
-
+        except:
+            self.lshw = ''
+            self.lsblk = ''
     def _dfs(self, root, hwclass, ret):
         if "class" not in root:
             return
