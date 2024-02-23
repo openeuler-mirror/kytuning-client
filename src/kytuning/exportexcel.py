@@ -404,7 +404,7 @@ class Unixbench(BenchMark):
         self.cmd = "执行命令："
         self.modify_argv = "修改参数："
         self.xlsx_col = self.thread
-        self.cpu_num_flag = "CPUs in system"
+        self.cpu_num_flag = "in system; run"
         self.thread_flag = "1 parallel"
         self.read_items_flag = "BASELINE"
         self.cols_width = [10, self.ret_col_1_width]
@@ -1440,6 +1440,27 @@ class ExportXlsx(object):
         for _ret_dict in _ret_dict_list:
             self.write_to_xlsx(_ret_dict, export_path)
         return True
+
+
+support_tools = {'lmbench': TOOL_NAME_LMB, 'unixbench': TOOL_NAME_UB, 'speccpu2006': TOOL_NAME_CPU06,
+                 'speccpu2017': TOOL_NAME_CPU17, 'iozone': TOOL_NAME_IOZONE, 'specjvm2008': TOOL_NAME_JVM08,
+                 'stream': TOOL_NAME_STREAM, 'netperf': TOOL_NAME_NETPERF, 'fio': TOOL_NAME_FIO}
+
+
+def constructParse():
+
+    parser = argparse.ArgumentParser(
+        description="Export benchmark raw results to excel format.")
+
+    parser.add_argument('-n', '--name', choices=support_tools.keys(), help='benchmark name.',
+                        type=str)
+
+    parser.add_argument('-f', '--file', help='absolute path of benchmark raw result.',
+                        type=str)
+
+    parser.add_argument('-o', '--output', help='the dir where we export excel to.',
+                        default=os.getcwd(), type=str)
+    return parser
 
 
 if __name__ == '__main__':
