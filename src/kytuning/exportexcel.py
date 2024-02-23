@@ -7,6 +7,7 @@ import os
 import re
 import json
 import difflib
+import argparse
 from base64 import b64decode
 from openpyxl import Workbook, load_workbook, utils
 from openpyxl.worksheet.worksheet import Worksheet
@@ -50,6 +51,17 @@ class BenchMark(object):
 
         self.ret_row_1_height = 50
 
+        # 起始行列
+        self.row_point_start = 1
+        self.col_point_start = 1
+
+        # 初始化行与列的高度和宽度,可在各个子类中覆盖.
+        self.cols_width = [self.ret_col_1_width]
+        self.rows_height = [
+            25,                    # 开始行
+            25,                    # 命令行
+            self.ret_row_1_height] # 参数行
+
         # excel_style
         thin = Side(border_style="thin", color="000000")
         self.border_thin = Border(
@@ -71,6 +83,14 @@ class BenchMark(object):
         self.color_data = PatternFill()
         self.font_data = Font(name="宋体")
 
+    @property
+    def row_data_start(self):
+        return self.row_point_start + len(self.rows_height)
+
+    @property
+    def col_data_start(self):
+        return self.col_point_start + len(self.cols_width)
+
     def set_cell_style(
         self, sheet, row_idx, col_idx, value,
             alg, fill=PatternFill(), font=Font(name="宋体")):
@@ -88,6 +108,27 @@ class BenchMark(object):
             worksheet.merge_cells(merge_row)
             merge_row = str(N)+str(row_A)
             worksheet[merge_row].alignment = alignment
+
+    def unmerge_col_cell(
+            self, worksheet: Worksheet, N: str, row_A: int, row_B: int):
+        if row_B - row_A > 0:
+            merge_row = str(N) + str(row_A) + ':' + str(N) + str(row_B)
+            worksheet.unmerge_cells(merge_row)
+
+    def merge_col_cell_by_value(self, sheet: Worksheet, N: str, row_A: int, row_B: int, value = None):
+        if row_B - row_A > 0:
+            merge_row = 0
+            if row_A > self.row_point_start and value is not None:
+                for i in range(self.row_point_start, row_A):
+                    cval = sheet.cell(row_A - i, utils.column_index_from_string(N)).value
+                    if cval is None:
+                        continue
+                    if cval == value:
+                        merge_row = i
+                    break
+                if merge_row > 0:
+                    self.unmerge_col_cell(sheet, N, row_A - merge_row, row_A - 1)
+            self.merge_col_cell(sheet, N, row_A - merge_row, row_B)
 
     def merge_row_cell(
             self, worksheet: Worksheet, row_N: int, col_A: int, col_B: int):
