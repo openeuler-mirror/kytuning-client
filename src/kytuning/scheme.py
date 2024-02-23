@@ -37,6 +37,44 @@ def subproc_call(command, timeout=None, check=False, hide=False):
             stdout=None, stderr=None,
             encoding='utf-8', timeout=timeout, check=check)
 
+
+class TestCmd(object):
+    def __init__(self, cmd, exfmt = None):
+        self._cmd = None
+        self._cmd_str = None
+        self._cmd_raw = None
+        self.__set(cmd, exfmt)
+
+    def __set(self, cmd, exfmt):
+        if cmd is not None:
+            if type(cmd) == dict:
+                if "c_param" in cmd:
+                    rdict = FUNC().call(cmd["c_param"])
+                    if exfmt is not None:
+                        rdict.update(exfmt)
+                    self._cmd_str = cmd["command"].format(**rdict)
+                else:
+                    self._cmd_str = cmd["command"]
+                if "pre_cmd" in cmd:
+                    self._cmd_str = cmd["pre_cmd"].format(command = self._cmd_str)
+                self._cmd_raw = cmd["command"]
+            else:
+                if exfmt is not None:
+                    self._cmd_str = self._cmd_raw = cmd.format(**exfmt)
+                else:
+                    self._cmd_str = self._cmd_raw = cmd
+            self._cmd = cmd
+        pass
+
+    @property
+    def cmd(self):
+        return self._cmd_str
+
+    @property
+    def raw(self):
+        return self._cmd_raw
+
+
 class TestConfig(object):
     def __init__(self, name, desc, get_cmd, set_cmd, value):
         self.name = name 
@@ -50,9 +88,10 @@ class TestConfig(object):
     def save(self):
         if self.get_cmd:
             try:
-                r = subproc_call(self.get_cmd)
+                r = subproc_call(self.get_cmd, hide=True)
                 if r.returncode:
                     raise TestConfigError(r.returncode)
+                assert (r.stdout is not None and len(r.stdout) > 0)
                 self.reset_cmd = self.set_cmd.format(value=r.stdout.replace('\n', ''))
             except SubprocessError as e:
                 raise TestConfigError(-1)
@@ -86,10 +125,18 @@ class TestConfig(object):
 class TestCase(object):
     def __init__(self, name, clean_cmd, build_cmd, test_cmd):
         self.name = name 
-        self.test_cmd = test_cmd 
+        self._test_cmd = TestCmd(test_cmd)
         self.build_cmd = build_cmd
         self.clean_cmd = clean_cmd
         self.configs = []
+
+    @property
+    def test_cmd(self):
+        return self._test_cmd.cmd
+
+    @property
+    def test_cmd_raw(self):
+        return self._test_cmd.raw
 
     def add_config(self, data):
         if isinstance(data, TestConfig):
@@ -184,10 +231,10 @@ class TestCase(object):
         data += "\trun      : %s\n" % self.test_cmd
         for tc in self.configs:
             data += "\t%s\n" % str(tc)
-        return data;
+        return data
 
     def to_data(self):
-        data = { 'name' : self.name, 'build' : self.build_cmd, 'clean' : self.clean_cmd, 'run' : self.test_cmd }
+        data = { 'name' : self.name, 'build' : self.build_cmd, 'clean' : self.clean_cmd, 'run' : self.test_cmd_raw }
         configs = []
         for e in self.configs:
             configs.append(e.to_data())
@@ -200,6 +247,10 @@ class Scheme(object):
         self.project = ''                 # 项目名称 
         self.test_type = ''                   # 项目类型 
         self.base_path = ''                # 根路径或者基本路径
+        self.run_path = ''
+        self.ret_path = ''
+        self.ret_raw_path = ''
+        self.src_path = ''
         self.tool_tgz = ''
         self.tool_dir = ''
         self.tool_decompression = ''
@@ -219,13 +270,17 @@ class Scheme(object):
         return data
 
     def prepare(self):
-        if os.access(self.base_path, os.F_OK) is False:
+        for k, v in {"base_path": self.base_path, "run_path": self.run_path, "ret_raw_path": self.ret_raw_path, "src_path": self.src_path}.items():
+            if len(v) == 0:
+                continue
+            if os.access(v, os.F_OK) is True:
+                continue
             try:
-                os.mkdir(self.base_path)
+                os.makedirs(v)
             except PermissionError as e: 
-                raise SchemeError("mkdir(base_path={base_path}) error: {desc}".format(base_path=self.base_path, desc=e))
+                raise SchemeError("mkdir({path_name}={base_path}) error: {desc}".format(path_name = k, base_path = v, desc = e))
             except FileNotFoundError as e:
-                raise SchemeError("mkdir(base_path={base_path}) error: {desc}".format(base_path=self.base_path, desc=e))
+                raise SchemeError("mkdir({path_name}={base_path}) error: {desc}".format(path_name = k, base_path = v, desc = e))
 
         log_init(self.log_file, self.log_level)
 
