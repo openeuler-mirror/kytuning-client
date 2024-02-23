@@ -1187,42 +1187,45 @@ class Netperf(BenchMark):
         self.tool_name = TOOL_NAME_NETPERF
         self.items = ["TCP_Stream", "UDP_Stream", "网络响应时间",
                       "TCP_CRR", "TCP_RR", "UDP_RR"]
+        self.cols_width = [self.ret_col_2_width]
+
+    def set_row_header(self, sheet: Worksheet, row_point: int, data: dict = None):
+        if row_point > sheet.max_row:
+            for i, _l in enumerate(self.items):
+                self.set_cell_style(sheet, row_point + i, self.col_point_start, _l, self.alignment_center, self.color_item_1, self.font_item_1)
+        pass
+
+    def find_row_point(self, sheet: Worksheet, data: dict = None):
+        return self.row_data_start
 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name}
         ret_dict['测试记录'] = []
         with open(file, 'r') as f:
             lines = f.readlines()
-            for i in [7, 14, 21, 28, 36, 44]:
+            for i in [6, 13, 22, 28, 36, 44]:
                 ret_dict['测试记录'].append(lines[i].strip().split(' ')[-1])
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
-        if ret_dict['tool_name'] in workbook.sheetnames:
-            sheet = workbook[ret_dict['tool_name']]
+        print(ret_dict)
+        sheet = None
+        if self.tool_name in workbook.sheetnames:
+            sheet = workbook[self.tool_name]
         else:
-            sheet = workbook.create_sheet(ret_dict['tool_name'])
-            sheet.column_dimensions['A'].width = 18.25
-            for i in range(1, 10):
-                sheet.row_dimensions[i].height = 34
-            sheet.merge_cells('A1:A3')
-            self.set_cell_style(
-                sheet, 1, 1, ret_dict['tool_name'] + '\n环境参数', self.alignment_center, self.color_title, self.font_title)
-            for i in range(4, 10):
-                self.set_cell_style(
-                    sheet, i, 1, self.items[i-4], self.alignment_center, self.color_item_1, self.font_item_1)
+            sheet = workbook.create_sheet(self.tool_name)
+            self.set_col_items(sheet)
+        
+        row_point = self.find_row_point(sheet)
+        self.set_row_header(sheet, row_point)
 
-        column_index = len(sheet[1]) + 1
-        sheet.column_dimensions[chr(ord('A')+column_index-1)].width = 18.25
-        self.set_cell_style(sheet, 1, column_index, 'netperf#' + str(column_index-1),
-                            self.alignment_left, self.color_col_top, self.font_col_top)
-        self.set_cell_style(sheet, 2, column_index, self.text_cmd + self.value_cmd,
-                            self.alignment_center, self.color_cmd, self.font_cmd)
-        self.set_cell_style(sheet, 3, column_index, self.text_modify_args +
-                            self.value_modify_args, self.alignment_center, self.color_cmd, self.font_cmd)
-        for i in range(4, 10):
-            self.set_cell_style(
-                sheet, i, column_index, ret_dict['测试记录'][i-4], self.alignment_center, self.color_data, self.font_data)
+        col_point = self.find_col_point(sheet, row_point)
+        self.set_col_title(sheet, col_point)
+
+        for _v in ret_dict['测试记录']:
+            self.set_cell_style(sheet, row_point, col_point, _v.strip(" "),
+                                self.alignment_center, self.color_data, self.font_data)
+            row_point += 1
 
         return True
 
@@ -1232,17 +1235,49 @@ class Fio(BenchMark):
         super().__init__()
         self.tool_name = TOOL_NAME_FIO
         self.items = {"items": ["bs", "io", "iops", "bw"]}
+        self.cols_width = [self.ret_col_1_width/2, self.ret_col_2_width/2]
 
+    def set_row_header(self, sheet: Worksheet, row_point: int, ret_dict):
+        if row_point > sheet.max_row:
+            self.set_cell_style(sheet, row_point, self.col_point_start, ret_dict['rw'], self.alignment_center, self.color_item_1, self.font_item_1)
+            for i, _l in enumerate(self.items["items"]):
+                self.set_cell_style(sheet, row_point + i, self.col_point_start + 1, _l, self.alignment_center, self.color_item_2, self.font_item_2)
+            self.merge_col_cell(sheet, utils.get_column_letter(self.col_point_start), row_point, row_point + len(self.items["items"]) - 1)
+        pass
+
+    def find_row_point(self, sheet: Worksheet, ret_dict):
+        if sheet.max_row >= self.row_data_start:
+            for row in sheet.iter_rows(min_row = self.row_data_start):
+                if row[self.col_point_start - 1].value == ret_dict['rw']:
+                    for rv in row[self.col_point_start - 1 + 2:]:
+                        if rv.value == ret_dict["items"]["bs"]:
+                            return row[self.col_point_start - 1].row
+        return sheet.max_row + 1
+ 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name}
+        units = {"k":1e3, "M":1e6, "G":1e9}
         _file_lines = None
         _rw = None
         with open(file, "r") as f:
             _file_lines = f.readlines()
+        if not _file_lines:
+            print("file is empty")
+            return None
         _regx = r'(?<=rw=).[a-z_]*'
-        _rw = re.findall(_regx, _file_lines[0])[0]
-        _regx = r'(?<=bs=\(R\)\s).[A-Z0-9_]*'
-        _bs = re.findall(_regx, _file_lines[0])[0]
+        _rw = re.findall(_regx, _file_lines[0])
+        if len(_rw) > 0:
+            _rw = _rw[0]
+        else:
+            print("Fio:rw not found")
+            return None
+        _regx = r'(?<=bs=\(R\)\s).[A-Z0-9_\.]*'
+        _bs = re.findall(_regx, _file_lines[0])
+        if len(_bs) > 0:
+            _bs = _bs[0]
+        else:
+            print("Fio:bs not found")
+            return None
         _read_flag = "read"
         _read_flag = _read_flag if _read_flag in _rw else "write"
         _flags_list = [_read_flag, "IOPS", "BW"]
@@ -1254,6 +1289,10 @@ class Fio(BenchMark):
             if all(_f in line for _f in _flags_list):
                 _regx = r'(?<=IOPS=).*,'
                 _iops = re.findall(_regx, line)[0][:-1]
+                for unit in units:
+                    if unit in _iops:
+                        _iops = float(_iops.replace(unit, '')) * units[unit]
+                        break
                 _regx = r'(?<=BW=).*\)'
                 _bw_io = re.findall(_regx, line)
                 _bw_list = _bw_io[0].split(")")[0].split("(")
@@ -1266,105 +1305,23 @@ class Fio(BenchMark):
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
-        index_start_row = self.index_start
-        index_start_col = self.index_start
-        index_start_items = index_start_row
-        text_cmd = self.text_cmd
-        text_modify_args = self.text_modify_args
-        text_first_cell = self.tool_name
-
-        rw = ret_dict["rw"]
-
         sheet = None
         if self.tool_name in workbook.sheetnames:  # 已存在sheet
             sheet = workbook[self.tool_name]
-            index_start_col = sheet.max_column + 1
-            index_start_items = 4
-            _rw_exit = False
-            for row in sheet.iter_rows(min_row=index_start_items):
-                if row[0].value == rw:
-                    index_start_items = row[0].row
-                    _rw_exit = True
-                    break
-            if not _rw_exit:
-                index_start_items = sheet.max_row + 1
-                self.set_cell_style(
-                    sheet, index_start_items, 1, rw,
-                    self.alignment_center,
-                    self.color_item_1, self.font_item_1)
-                for i, _l in enumerate(self.items["items"]):
-                    self.set_cell_style(
-                        sheet, index_start_items+i, 2, _l,
-                        self.alignment_center,
-                        self.color_item_2, self.font_item_2)
-                self.merge_col_cell(
-                    sheet, "A", index_start_items, index_start_items+3)
-
         else:   # 不存在sheet
             sheet = workbook.create_sheet(self.tool_name)
-            sheet.column_dimensions['A'].width = self.ret_col_1_width/2
-            sheet.column_dimensions['B'].width = self.ret_col_2_width/2
-            # 开始
-            point_row = 1
-            self.set_cell_style(
-                sheet, point_row,
-                index_start_col, text_first_cell,
-                self.alignment_center, self.color_title, self.font_title)
-            self.merge_row_cell(sheet, point_row,
-                                index_start_col, index_start_col+1)
-            # 执行命令
-            point_row += 1
-            sheet.row_dimensions[point_row].height = 25
-            self.set_cell_style(
-                sheet, point_row, index_start_col, text_cmd,
-                self.alignment_center, self.color_cmd, self.font_cmd)
-            self.merge_row_cell(sheet, point_row,
-                                index_start_col, index_start_col+1)
-            # 修改参数
-            point_row += 1
-            sheet.row_dimensions[point_row].height = self.ret_row_1_height
-            self.set_cell_style(
-                sheet, point_row, index_start_col,
-                text_modify_args,
-                self.alignment_center, self.color_cmd, self.font_cmd)
-            self.merge_row_cell(sheet, point_row,
-                                index_start_col, index_start_col+1)
-            point_row += 1
-            self.set_cell_style(
-                sheet, point_row, 1, rw,
-                self.alignment_center, self.color_item_1, self.font_item_1)
-            for i, _l in enumerate(self.items["items"]):
-                self.set_cell_style(
-                    sheet, point_row+i, index_start_col+1, _l,
-                    self.alignment_center, self.color_item_2, self.font_item_2)
-            index_start_col = 3
-            index_start_items = point_row
+            self.set_col_items(sheet)
 
-        self.merge_col_cell(sheet, "A", 4, 7)
+        row_point = self.find_row_point(sheet, ret_dict)
+        self.set_row_header(sheet, row_point, ret_dict)
 
-        sheet.column_dimensions[utils.get_column_letter(
-            index_start_col)].width = self.ret_col_2_width
-        idx_col = index_start_col
-        self.set_cell_style(
-            sheet, 1, idx_col, self.tool_name + '#'+str(idx_col-2),
-            self.alignment_center, self.color_col_top,
-            self.font_col_top)
-        if self.value_cmd:
-            self.set_cell_style(
-                sheet, 2, idx_col,
-                self.value_cmd,
-                self.alignment_center, self.color_data, self.font_data)
-        if self.value_modify_args:
-            self.set_cell_style(
-                sheet, 3, idx_col,
-                self.value_modify_args,
-                self.alignment_center, self.color_data, self.font_data)
+        col_point = self.find_col_point(sheet, row_point)
+        self.set_col_title(sheet, col_point)
+
         for i, v in enumerate(ret_dict["items"].values()):
-            self.set_cell_style(
-                sheet, index_start_items+i,
-                idx_col,
-                v, self.alignment_center,
-                self.color_data, self.font_data)
+            self.set_cell_style(sheet, row_point + i, col_point, v,
+                                self.alignment_center, self.color_data, self.font_data)
+
         return True
 
 
