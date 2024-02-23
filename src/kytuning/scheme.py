@@ -463,35 +463,39 @@ class SchemeParser(object):
             scheme.configs.append(TestConfig(name, desc, get_cmd, set_cmd, value))
 
 
-    def parse_testcases(self, scheme, data):
-        clean = data.get('clean')
-        if clean is None:
-            logging.error('missing \'clean\' in testcase: {data}'.format(data=data))
-            raise SchemeParserError("missing 'clean' in testcase")
-
-        build = data.get('build')
-        if build is None:
-            logging.error('missing \'clean\' in testcase: {data}'.format(data=data))
-            raise SchemeParserError("missing 'build' in testcase")
-
-        testcmd = data.get('run')
-        if testcmd is None:
-            logging.error('missing \'run\' in testcase: {data}'.format(data=data))
-            raise SchemeParserError("missing 'run' in testcase")
-
-
-        value = data.get('configs')
-        if value is None or len(value) == 0:
-            scheme.testcases.append(TestCase("{project}-null-0".format(project=scheme.project),
-                clean, build, testcmd))
+    def parse_testcases(self, scheme, datas):
+        if datas is None or len(datas) == 0:
             return
-        configs = self.parse_testcase_config(value)
-        flag = data.get('schemeflag') 
-        if flag:
-            self.parse_testcase_asm(scheme, clean, build, testcmd, configs)
-        else:
-            self.parse_testcase_sum(scheme, clean, build, testcmd, configs)
 
+        for data in datas:
+            clean = data.get('clean')
+            if clean is None:
+                logging.error('missing \'clean\' in testcase: {data}'.format(data=data))
+                raise SchemeParserError("missing 'clean' in testcase")
+
+            build = data.get('build')
+            if build is None:
+                logging.error('missing \'clean\' in testcase: {data}'.format(data=data))
+                raise SchemeParserError("missing 'build' in testcase")
+
+            testcmd = data.get('run')
+            if testcmd is None:
+                logging.error('missing \'run\' in testcase: {data}'.format(data=data))
+                raise SchemeParserError("missing 'run' in testcase")
+
+            tname = data.get('name')
+
+            value = data.get('configs')
+            if value is None or len(value) == 0:
+                scheme.testcases.append(TestCase("{project}-{tstname}-0".format(project=scheme.project, tstname='null' if tname is None else tname), clean, build, testcmd))
+            else:
+                configs = self.parse_testcase_config(value)
+                flag = data.get('schemeflag') 
+                if flag:
+                    self.parse_testcase_asm(scheme, tname, clean, build, testcmd, configs)
+                else:
+                    self.parse_testcase_sum(scheme, tname, clean, build, testcmd, configs)
+        pass
 
     def parse_testcase_config(self, confs):
         data = {}
@@ -535,17 +539,17 @@ class SchemeParser(object):
 
         return data
 
-    def parse_testcase_sum(self, scheme, clean, build, testcmd, data):
+    def parse_testcase_sum(self, scheme, tname, clean, build, testcmd, data):
         for key in data.keys():
             configs = data[key]
             for idx in range(len(configs)):
                 name = "{project}-{config}-{index}".format(
-                        project=scheme.project, config=key, index=idx)
+                        project=(scheme.project if tname is None else "{}-{}".format(scheme.project, tname)), config=key, index=idx)
                 testcase = TestCase(name, clean, build, testcmd)
                 testcase.add_config(configs[idx])
                 scheme.testcases.append(testcase)
 
-    def parse_testcase_asm(self, scheme, clean, build, testcmd, data):
+    def parse_testcase_asm(self, scheme, tname, clean, build, testcmd, data):
         result = [] 
         for item in data.values(): 
             if len(result) == 0: 
@@ -560,7 +564,7 @@ class SchemeParser(object):
                     result.append((m, n))
 
         for idx in range(len(result)):
-            name = "{project}-assemble-{index}".format(project=scheme.project, index=idx)
+            name = "{project}-assemble-{index}".format(project=(scheme.project if tname is None else "{project}-{tname}".format(scheme.project, tname)), index=idx)
             testcase = TestCase(name, clean, build, testcmd)
             for tc in result[idx]:
                 testcase.add_config(tc)
