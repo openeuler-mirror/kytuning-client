@@ -47,6 +47,19 @@ class FUNC(object):
         return None
 
     def func_jvm_mxmem(self, type):
+        mxmem = KYConfig().get(['specjvm', 'mx_mem'])
+        if mxmem is not None and len(mxmem) > 0:
+            return mxmem
+        ## 获取物理内存，单位为字节
+        mxmem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+        ## 转化为MB
+        mxmem = mxmem / (1024 ** 2) 
+        ## 取2/3的内存
+        mxmem = int(mxmem * 2 / 3)
+        ## 转化成字符串
+        if mxmem > 0:
+            mxmem = str(mxmem) + 'm'
+            return mxmem
         return None
 
     def func_cpu2006_config(self, type):
