@@ -86,6 +86,26 @@ class FUNC(object):
         return None
 
     def func_cpu2017_config(self, type):
+        arch_str = None
+        arch = ExecCmd(command = 'uname -m', env = self.curenv).run()
+        if arch.exit_status == 0:
+            arch_str = arch.stdout.strip()
+        if arch_str is None:
+            return KYConfig().get(['speccpu2017', 'config_file'])
+        else:
+            cpu_config = None
+            if arch_str == 'x86_64':
+                cpu_config = KYConfig().get(['speccpu2017', 'config_file_x86'])
+            elif arch_str == 'aarch64':
+                cpu_config = KYConfig().get(['speccpu2017', 'config_file_arm'])
+            if cpu_config is None or len(cpu_config) == 0:
+                cpu_config = KYConfig().get(['speccpu2017', 'config_file'])
+            if cpu_config is None or len(cpu_config) == 0:
+                if arch_str == 'x86_64':
+                    cpu_config = "cpu2017-x86-fix.cfg"
+                elif arch_str == 'aarch64':
+                    cpu_config = "cpu2017-arm64-fix.cfg"
+            return cpu_config
         return None
 
     def call(self, func: dict) -> dict:
