@@ -552,7 +552,11 @@ class EnvManager(object):
     
     # 导出环境信息到Json
     def collect(self):
-        return json.dumps(self.export_env_dict(), indent = 2)
+        try:
+            info_json = json.dumps(self.export_env_dict(), indent = 2)
+        except:
+            logging.error("export env info to json failed!")
+        return info_json
 
 
 if __name__ == '__main__':
