@@ -823,50 +823,18 @@ class Iozone(BenchMark):
             sheet = workbook[ret_dict['tool_name']]
         else:
             sheet = workbook.create_sheet(ret_dict['tool_name'])
-            sheet.row_dimensions[1].height = 38
-            sheet.row_dimensions[2].height = 29
-            sheet.row_dimensions[3].height = 29
-            for i in range(4, 4 + record_count * item_count):
-                sheet.row_dimensions[i].height = 25
-            sheet.column_dimensions['A'].width = 9.75
-            sheet.column_dimensions['B'].width = 9.75
-            sheet.merge_cells('A1:B1')
-            sheet.merge_cells('A2:B2')
-            sheet.merge_cells('A3:B3')
-            self.set_cell_style(
-                sheet, 1, 1, ret_dict['tool_name'], self.alignment_center, self.color_title, self.font_title)
-            self.set_cell_style(sheet, 2, 1, self.text_cmd,
-                                self.alignment_center, self.color_cmd, self.font_cmd)
-            self.set_cell_style(sheet, 3, 1, self.text_modify_args,
-                                self.alignment_center, self.color_cmd, self.font_cmd)
-            for i in range(item_count):
-                item_cell_start_row = 4 + i * record_count
-                self.merge_col_cell(
-                    sheet, 'A', item_cell_start_row, item_cell_start_row + record_count - 1)
-                self.set_cell_style(sheet, item_cell_start_row, 1,
-                                    self.items['rw_items'][i], self.alignment_center, self.color_item[i % 2], self.font_item[i % 2])
-                for j in range(record_count):
-                    self.set_cell_style(sheet, item_cell_start_row + j, 2,
-                                        ret_dict['测试记录'][j]['文件大小'], self.alignment_center, self.color_fsize[i % 2], self.font_fsize[i % 2])
+            self.set_col_items(sheet)
 
-        column_index = len(sheet[1]) + 1
-        sheet.column_dimensions[chr(ord('A')+column_index-1)].width = 18.25
-        self.set_cell_style(sheet, 1, column_index, 'iozone#' + str(column_index-2),
-                            self.alignment_left, self.color_col_top, self.font_col_top)
-        self.set_cell_style(sheet, 2, column_index, self.value_cmd,
-                            self.alignment_center, self.color_cmd_value, self.font_cmd_value)
-        self.set_cell_style(sheet, 3, column_index, self.value_modify_args,
-                            self.alignment_center, self.color_cmd_value, self.font_cmd_value)
+        for record in ret_dict['测试记录']:
+            row_point = self.find_row_point(sheet, record)
+            self.set_row_header(sheet, row_point, record)
 
-        for i in range(item_count):
-            item_cell_start_row = 4 + i * record_count
-            for j in range(record_count):
-                self.set_cell_style(sheet,
-                                    item_cell_start_row + j,
-                                    column_index,
-                                    ret_dict['测试记录'][j][self.items['rw_items'][i]],
-                                    self.alignment_center,
-                                    self.color_data[i % 2], self.font_data[i % 2])
+            col_point = self.find_col_point(sheet, row_point)
+            self.set_col_title(sheet, col_point)
+
+            for idx in range(0, len(self.items['rw_items'])):
+                self.set_cell_style(sheet, row_point + idx, col_point, record[self.items['rw_items'][idx]],
+                            self.alignment_center, self.color_data, self.font_data)
 
         return True
 
@@ -881,6 +849,15 @@ class Specjvm2008(BenchMark):
                       "sunflow", "xml",
                       "Noncompliant composite result"]
         self.tune = ["base", "peak"]
+        self.cols_width = [10, self.ret_col_2_width]
+
+    def set_row_header(self, sheet: Worksheet, row_point: int, data: dict):
+        if row_point > sheet.max_row:
+            self.set_cell_style(sheet, row_point, self.col_point_start, data["tune"], self.alignment_center, self.color_item_1, self.font_item_1)
+            for i, _l in enumerate(self.items):
+                self.set_cell_style(sheet, row_point + i, self.col_point_start + 1, _l, self.alignment_center, self.color_item_2, self.font_item_2)
+            self.merge_col_cell(sheet, utils.get_column_letter(self.col_point_start), row_point, row_point + len(self.items) - 1)
+        pass
 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name, "items": {}}
@@ -915,70 +892,25 @@ class Specjvm2008(BenchMark):
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
+        sheet_name = "%s" % (self.tool_name)
+        if sheet_name in workbook.sheetnames:  # 已存在sheet
+            sheet = workbook[sheet_name]
+        else:   # 不存在sheet
+            sheet = workbook.create_sheet(sheet_name)
+            self.set_col_items(sheet)
+
         for k, v in ret_dict["items"].items():
-            point_row = 1
-            point_col = 1
-            _tune = k
-            shee_name = "%s(%s)" % (self.tool_name, _tune)
-            if shee_name in workbook.sheetnames:  # 已存在sheet
-                sheet = workbook[shee_name]
-                point_col = sheet.max_column + 1
-            else:   # 不存在sheet
-                sheet = workbook.create_sheet(shee_name)
-                # 第一行,列
-                sheet.column_dimensions[utils.get_column_letter(
-                    point_col)].width = self.ret_col_1_width
-                self.set_cell_style(
-                    sheet, point_row, point_col, _tune.title(),
-                    self.alignment_center, self.color_title,
-                    self.font_title)
-                point_row += 1
-                # 执行命令
-                self.set_cell_style(
-                    sheet, point_row, point_col, self.text_cmd,
-                    self.alignment_center, self.color_cmd,
-                    self.font_cmd)
-                point_row += 1
-                # 修改参数
-                sheet.row_dimensions[point_row].height = 50
-                self.set_cell_style(
-                    sheet, point_row, point_col, self.text_modify_args,
-                    self.alignment_center, self.color_cmd,
-                    self.font_cmd)
-                point_row += 1
-                for i, _v in enumerate(self.items):
-                    self.set_cell_style(
-                        sheet, point_row+i, point_col, _v,
-                        self.alignment_center, self.color_item_1,
-                        self.font_item_1)
-                point_col += 1
-            # 填充列头
-            point_row = 1
-            sheet.column_dimensions[utils.get_column_letter(
-                point_col)].width = self.ret_col_data_width
-            self.set_cell_style(
-                sheet, point_row, point_col,
-                self.tool_name + '#'+str(point_col-1),
-                self.alignment_center, self.color_col_top, self.font_col_top)
-            point_row += 1
-            if self.value_cmd:
-                self.set_cell_style(
-                    sheet, point_row, point_col,
-                    self.value_cmd,
-                    self.alignment_center, self.color_data, self.font_data)
-            point_row += 1
-            if self.value_modify_args:
-                self.set_cell_style(
-                    sheet, point_row, point_col,
-                    self.value_modify_args,
-                    self.alignment_center, self.color_data, self.font_data)
-            point_row += 1
+            row_point = self.find_row_point(sheet, {"tune": k})
+            self.set_row_header(sheet, row_point, {"tune": k})
+
+            col_point = self.find_col_point(sheet, row_point)
+            self.set_col_title(sheet, col_point)
+
             for _, _v in v.items():
-                self.set_cell_style(
-                    sheet, point_row, point_col, _v,
-                    self.alignment_center, self.color_data,
-                    self.font_data)
-                point_row += 1
+                self.set_cell_style(sheet, row_point, col_point, _v,
+                                    self.alignment_center, self.color_data, self.font_data)
+                row_point += 1
+
         return True
 
 
@@ -1026,6 +958,26 @@ class Lmbench(BenchMark):
                                                 "L2 $", "Main mem",
                                                 "Rand mem"]
         }
+        self.cols_width = [self.ret_col_1_width, self.ret_col_2_width]
+
+    def set_row_header(self, sheet: Worksheet, row_point: int, ret_dict):
+        if row_point > sheet.max_row:
+            # 填充第一列
+            for k, v in self.items.items():
+                self.set_cell_style(sheet, row_point, self.col_point_start, k,
+                                    self.alignment_center, self.color_item_1, self.font_item_1)
+                if len(v) > 1:
+                    # 填充第二列
+                    for i, s in enumerate(v):
+                        self.set_cell_style(sheet, row_point + i, self.col_point_start + 1, s,
+                                            self.alignment_center, self.color_item_2, self.font_item_2)
+                    self.merge_col_cell(sheet, utils.get_column_letter(self.col_point_start), row_point, row_point + len(v) - 1)
+                    row_point += len(v) - 1
+                row_point += 1
+        pass
+
+    def find_row_point(self, sheet: Worksheet, data: dict):
+        return self.row_data_start
 
     def parse_target_len(self, t_line):
         target_lens = list()
@@ -1112,99 +1064,29 @@ class Lmbench(BenchMark):
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
-        index_start_row = self.index_start
-        index_start_col = self.index_start
-        index_start_items = index_start_row
-        text_cmd = self.text_cmd
-        text_modify_args = self.text_modify_args
-        text_first_cell = self.tool_name
-
         sheet = None
         if self.tool_name in workbook.sheetnames:  # 已存在sheet
             sheet = workbook[self.tool_name]
-            index_start_col = sheet.max_column + 1
-            index_start_items = 4
-
         else:   # 不存在sheet
-            point_row = 0
             sheet = workbook.create_sheet(self.tool_name)
-            sheet.column_dimensions['A'].width = self.ret_col_1_width
-            sheet.column_dimensions['B'].width = self.ret_col_2_width
-            # 开始
-            self.set_cell_style(
-                sheet, index_start_row+point_row,
-                index_start_col, text_first_cell,
-                self.alignment_center, self.color_title, self.font_title)
-            self.merge_row_cell(sheet, index_start_row+point_row,
-                                index_start_col, index_start_col+1)
-            # 执行命令
-            point_row += 1
-            sheet.row_dimensions[index_start_row+point_row].height = 25
-            self.set_cell_style(
-                sheet, index_start_row+point_row, index_start_col, text_cmd,
-                self.alignment_center, self.color_cmd, self.font_cmd)
-            self.merge_row_cell(sheet, index_start_row+point_row,
-                                index_start_col, index_start_col+1)
-            # 修改参数
-            point_row += 1
-            sheet.row_dimensions[index_start_row +
-                                 point_row].height = self.ret_row_1_height
-            self.set_cell_style(
-                sheet, index_start_row+2, index_start_col, text_modify_args,
-                self.alignment_center, self.color_cmd, self.font_cmd)
-            self.merge_row_cell(sheet, index_start_row+point_row,
-                                index_start_col, index_start_col+1)
-            # 填充第一列
-            index_start_items = point_row + 1
-            for k, v in self.items.items():
-                point_row += 1
-                self.set_cell_style(
-                    sheet, index_start_row+point_row,
-                    index_start_col, k,
-                    self.alignment_center, self.color_item_1, self.font_item_1)
-                if len(v) > 1:
-                    # 填充第二列
-                    for i, s in enumerate(v):
-                        self.set_cell_style(
-                            sheet, index_start_row+point_row+i,
-                            index_start_col+1, s, self.alignment_center,
-                            self.color_item_2, self.font_item_2)
-                    self.merge_col_cell(
-                        sheet, "A", index_start_row+point_row,
-                        index_start_row+point_row+len(v)-1)
-                    point_row += len(v)-1
-            index_start_col = 3
+            self.set_col_items(sheet)
+
+        row_point = self.find_row_point(sheet, ret_dict)
+        self.set_row_header(sheet, row_point, ret_dict)
+
+        col_point = self.find_col_point(sheet, row_point)
+        self.set_col_title(sheet, col_point)
+
         for i, item_list in enumerate(ret_dict["items"]):
-            # 填充列头
-            idx_col = index_start_col+i
-            sheet.column_dimensions[utils.get_column_letter(
-                idx_col)].width = self.ret_col_data_width
-            self.set_cell_style(
-                sheet, 1, idx_col, self.tool_name + '#'+str(idx_col-2),
-                self.alignment_center, self.color_col_top,
-                self.font_col_top)
-
-            if self.value_cmd:
-                self.set_cell_style(
-                    sheet, 2, idx_col,
-                    self.value_cmd,
-                    self.alignment_center, self.color_data, self.font_data)
-            if self.value_modify_args:
-                self.set_cell_style(
-                    sheet, 3, idx_col,
-                    self.value_modify_args,
-                    self.alignment_center, self.color_data, self.font_data)
-
-            j_index = index_start_items
+            j_index = row_point
             for item in item_list:
                 _items = list(item.values())[0]
                 for _ in _items.keys():
+                    cell_key = sheet.cell(j_index, self.col_point_start - 1 + 2).value
+                    self.set_cell_style(sheet, j_index, col_point, _items.get(cell_key),
+                                        self.alignment_center, self.color_data, self.font_data)
                     j_index += 1
-                    cell_key = sheet.cell(j_index, 2).value
-                    self.set_cell_style(
-                        sheet, j_index, idx_col, _items.get(cell_key),
-                        self.alignment_center,
-                        self.color_data, self.font_data)
+
         return True
 
 
@@ -1673,24 +1555,18 @@ class ExportXlsx(object):
 
 
 if __name__ == '__main__':
-    ex = ExportXlsx()
-    if 0:
-        try:  # 调试env导出excel时使用
-            os.remove("/home/wqs/virtul machine/Share/"+ex.excel_name)
-        except Exception:
-            pass
-    env = 0
-    if env:
-        json_data = ''
-        with open(
-                "/home/wqs/vscode_ws/python/" +
-                "kytuning/kytuning/test/export_excel/getenv.json", "r") as f:
-            json_data = json.load(f)
-        ex.export_env_to_xlsx(json_data, "/home/wqs/virtul machine/Share")
-    else:
-        tool_name = TOOL_NAME_JVM08
-        path = "/home/wqs/vscode_ws/python/kytuning/kytuning/test/export_excel"
-        ex.export_ret_to_xlsx(
-            tool_name,
-            "/home/wqs/virtul machine/Share/文件传输专用/kytuning/specjvm-demo-null-0-0",
-            "/home/wqs/virtul machine/Share/文件传输专用/kytuning", '测试cmd', '测试args')
+
+    parse = constructParse()
+
+    try:
+        args = parse.parse_args()
+        if args is not None:
+            tool_name = support_tools[args.name]
+            xlsx_obj = ExportXlsx()
+
+            path = args.output
+            xlsx_obj.export_ret_to_xlsx(
+                tool_name, args.file,
+                path, 'cmd', 'args')
+    except Exception as e:
+        parse.print_help()
