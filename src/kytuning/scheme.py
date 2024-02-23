@@ -284,17 +284,17 @@ class Scheme(object):
 
         log_init(self.log_file, self.log_level)
 
-        if self.tool_decompression:
-            logging.info('exec({tool_dec}) ...'.format(tool_dec=self.tool_decompression))
-            try:
-                r = subproc_call(self.tool_decompression)
-                if r.returncode:
-                    raise SchemeError("exec({tool_dec}) error {code}.".format(tool_dec=self.tool_decompression, code=r))
-                logging.info('exec({tool_dec}) done'.format(tool_dec=self.tool_decompression))
-            except SubprocessError as e:
-                raise SchemeError("exec({tool_dec}) error {code}.".format(tool_dec=self.tool_decompression, code=e))
-
         if self.tool_dir:
+            if not os.path.exists(self.tool_dir):
+                if self.tool_decompression:
+                    logging.info('exec({tool_dec}) ...'.format(tool_dec=self.tool_decompression))
+                    try:
+                        r = subproc_call(self.tool_decompression)
+                        if r.returncode:
+                            raise SchemeError("exec({tool_dec}) error {code}.".format(tool_dec=self.tool_decompression, code=r))
+                        logging.info('exec({tool_dec}) done'.format(tool_dec=self.tool_decompression))
+                    except SubprocessError as e:
+                        raise SchemeError("exec({tool_dec}) error {code}.".format(tool_dec=self.tool_decompression, code=e))
             try:
                 os.chdir(self.tool_dir)
                 logging.info("chdir({tool_dir}) done".format( tool_dir=self.tool_dir))
@@ -309,6 +309,18 @@ class Scheme(object):
 
     def get_base_path(self):
         return self.base_path
+
+    def get_run_path(self):
+        return self.run_path
+
+    def get_ret_path(self):
+        return self.ret_path
+
+    def get_ret_raw_path(self):
+        return self.ret_raw_path
+
+    def get_src_path(self):
+        return self.src_path
 
     def get_tool_decompression(self):
         return self.tool_decompression 
@@ -332,12 +344,14 @@ class Scheme(object):
         return self.maxiterations
 
     def get_testcases(self):
-        return self.testcases;
+        return self.testcases
 
     def __str__(self):
         data = "Scheme({value})\n".format(value=self.project)
         data += "\ttest_type   : {value}\n".format(value=self.test_type)
         data += "\tbase_path   : {value}\n".format(value=self.base_path)
+        data += "\tret_path    : {value}\n".format(value=self.ret_path)
+        data += "\tsrc_path    : {value}\n".format(value=self.src_path)
         data += "\tlog_file    : {value}\n".format(value=self.log_file)
         data += "\tlog_level   : {value}\n".format(value=self.log_level) 
         data += "\ttool_tgz    : {value}\n".format(value=self.tool_tgz)
@@ -356,6 +370,7 @@ class Scheme(object):
 
 class SchemeParser(object):
     def __init__(self):
+        self.config = KYConfig()
         pass
 
     def parse(self, stream): 
@@ -368,31 +383,39 @@ class SchemeParser(object):
 
             scheme.project = data.get('project')
             if scheme.project is None:
-                raise SchemeParserError("missing 'project'") 
+                raise SchemeParserError("missing 'project'")
+
             scheme.test_type = data.get('test_type')
             if scheme.test_type is None:
-                raise SchemeParserError("missing 'test_type'") 
+                raise SchemeParserError("missing 'test_type'")
+
             scheme.base_path = data.get('base_path')
             if scheme.base_path is None:
-                raise SchemeParserError("missing 'base_path'") 
-            scheme.tool_tgz = data.get('tool_tgz')
-            if scheme.tool_tgz is None:
-                raise SchemeParserError("missing 'tool_tgz'") 
+                if self.config.get(['main', 'base_path']) is None:
+                    raise SchemeParserError("missing 'base_path'")
+                scheme.base_path = "{base_path}/{run_path}/{test_type}".format(base_path = self.config.base_path, run_path = self.config.run_path, test_type = scheme.test_type)
+
+            scheme.run_path = "{base_path}/{run_path}/{test_type}".format(base_path = self.config.base_path, run_path = self.config.run_path, test_type = scheme.test_type)
+            scheme.ret_path = "{base_path}/{ret_path}/{test_type}".format(base_path = self.config.base_path, ret_path = self.config.ret_path, test_type = scheme.test_type)
+            scheme.ret_raw_path = "{ret_path}/raw_result".format(ret_path = scheme.ret_path)
+            scheme.src_path = "{base_path}/{ret_path}".format(base_path = self.config.base_path, ret_path = self.config.src_path)
+
+            value = data.get('tool_tgz')
+            if value is None:
+                raise SchemeParserError("missing 'tool_tgz'")
+            scheme.tool_tgz = value.format(base_path=self.config.base_path)
 
             value = data.get('tool_dir')
             if value is None:
-                raise SchemeKeyMissing("missing 'tool_dir'")
+                raise SchemeParserError("missing 'tool_dir'")
             scheme.tool_dir = value.format(base_path=scheme.base_path)
 
             value = data.get('tool_decompression')
             if value is None:
                 raise SchemeParserError("missing 'tool_decompression'")
 
-            if value.find('{base_path}') != -1:
-                scheme.tool_decompression = value.format(
-                        tool_tgz=scheme.tool_tgz, base_path=scheme.base_path)
-            else:
-                scheme.tool_decompression = value.format(tool_tgz=scheme.tool_tgz)
+            scheme.tool_decompression = TestCmd(value, {"tool_tgz": scheme.tool_tgz, "tool_dir": scheme.tool_dir,
+                        "base_path": scheme.base_path, "src_path": scheme.src_path}).cmd
 
             value = data.get('log_level')
             if value: 
@@ -402,17 +425,17 @@ class SchemeParser(object):
             if value:
                 scheme.log_file = value.format(base_path=scheme.base_path)
 
+            scheme.maxiterations = data.get('maxiterations', 1)
+
             scheme.rpm_list = data.get('rpm_list', [])
 
             value = data.get('configs')
             if value:
                 self.parse_global_config(scheme, value)
 
-            scheme.maxiterations = data.get('maxiterations', 1) 
-
             value = data.get('testcase')
             if value:
-                self.parse_testcases(scheme, value)
+                self.parse_testcases(scheme, value if type(value) == list else [ value ])
 
             return scheme 
         except yaml.MarkedYAMLError as e: 
