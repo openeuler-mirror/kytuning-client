@@ -407,6 +407,15 @@ class Unixbench(BenchMark):
         self.cpu_num_flag = "CPUs in system"
         self.thread_flag = "1 parallel"
         self.read_items_flag = "BASELINE"
+        self.cols_width = [10, self.ret_col_1_width]
+
+    def set_row_header(self, sheet: Worksheet, row_point: int, data: dict):
+        if row_point > sheet.max_row:
+            self.set_cell_style(sheet, row_point, self.col_point_start, data["tune"], self.alignment_center, self.color_item_1, self.font_item_1)
+            for i, _l in enumerate(self.items):
+                self.set_cell_style(sheet, row_point + i, self.col_point_start + 1, _l, self.alignment_left, self.color_item_2, self.font_item_2)
+            self.merge_col_cell(sheet, utils.get_column_letter(self.col_point_start), row_point, row_point + len(self.items) - 1)
+        pass
 
     def ret_to_dict(self, file: str):
         """测试结果解析"""
@@ -417,10 +426,6 @@ class Unixbench(BenchMark):
         score_list = ['' for i in self.items]
         with open(file, 'r') as f:
             file_lines = f.readlines()
-        ret_dict[self.thread[0]] = dict(
-            zip(self.items, score_list))
-        ret_dict[self.thread[1]] = dict(
-            zip(self.items, score_list))
         for line in file_lines:
             if self.cpu_num_flag in line:
                 maxcpu = re.findall(
@@ -476,6 +481,7 @@ class Unixbench(BenchMark):
                                     self.alignment_center, self.color_data, self.font_data)
                 row_point += 1
 
+        return True
 
 class Speccpu2006(BenchMark):
     def __init__(self):
@@ -564,15 +570,14 @@ class Speccpu2006(BenchMark):
                         _str = "NR/RE"
                         if len(temp) > 0:
                             _str = temp[-1].strip()
-                            _thread = (
-                                self.thread[1] if temp[0].strip() > '1' else
-                                self.thread[0])
+                            if _thread is None:
+                                _thread = (self.thread[1] if temp[0].strip() > '1' else self.thread[0])
                         _scores_tune[self.tune[j]].append(_str)
                     if not _read_flag:
                         break
             if not _thread or not _type:
                 print("线程数为%s,测试类型为%s!" % (_thread, _type))
-                return None
+                continue
             _items_key = _thread+"_"+_type
             score_dict = {}
             for k, v in _scores_tune.items():
@@ -586,53 +591,27 @@ class Speccpu2006(BenchMark):
         index_start_row = self.index_start
         for k, v in ret_dict["items"].items():
             for _k, _v in v.items():
-                shee_name = "%s(%s)" % (self.tool_name, _k)
+                sheet_name = "%s(%s)" % (self.tool_name, _k)
+                sheet = None
+                if sheet_name in workbook.sheetnames:  # 已存在sheet
+                    sheet = workbook[sheet_name]
+                else:   # 不存在sheet
+                    sheet = workbook.create_sheet(sheet_name)
+                    self.set_col_items(sheet)
 
                 _thread = k.split("_")[0]
                 _dtype = k.split("_")[1]
-                idx_start_items = 0
-                if _thread == self.thread[0]:
-                    if _dtype == self.dtype[0]:  # 单线程 fp
-                        idx_start_items = index_start_row+3
-                    else:                                   # 单线程 int
-                        idx_start_items = 25  # 根据模板固定，也可以根据self.items计算
-                elif _thread == self.thread[1]:
-                    if _dtype == self.dtype[0]:  # 多线程fp
-                        idx_start_items = 41
-                    else:                                   # 多线程int
-                        idx_start_items = 62
-                sheet = None
-                if shee_name in workbook.sheetnames:  # 已存在sheet
-                    sheet = workbook[shee_name]
-                else:   # 不存在sheet
-                    sheet = workbook.create_sheet(shee_name)
-                    self.set_col_items(sheet, _k)
-                if is_new:
-                    idx_col = sheet.max_column + 1
-                    is_new = False
-                # 列头
-                sheet.column_dimensions[utils.get_column_letter(
-                    idx_col)].width = self.ret_col_data_width
-                self.set_cell_style(
-                    sheet, idx_start_items-3, idx_col,
-                    self.tool_name + '#'+str(idx_col-1),
-                    self.alignment_center, self.color_col_top,
-                    self.font_col_top)
-                if self.value_cmd:
-                    self.set_cell_style(
-                        sheet, idx_start_items-2, idx_col,
-                        self.value_cmd,
-                        self.alignment_center, self.color_data, self.font_data)
-                if self.value_modify_args:
-                    self.set_cell_style(
-                        sheet, idx_start_items-1, idx_col,
-                        self.value_modify_args,
-                        self.alignment_center, self.color_data, self.font_data)
+
+                row_point = self.find_row_point(sheet, {"thread": _thread, "type": _dtype})
+                self.set_row_header(sheet, row_point, {"thread": _thread, "type": _dtype})
+
+                col_point = self.find_col_point(sheet, row_point)
+                self.set_col_title(sheet, col_point)
 
                 for i, (_, __v) in enumerate(_v.items()):
-                    self.set_cell_style(
-                        sheet, idx_start_items+i,
-                        idx_col, __v, self.alignment_center)
+                    self.set_cell_style(sheet, row_point + i, col_point, __v,
+                                        self.alignment_center, self.color_data, self.font_data)
+
         return True
 
 
