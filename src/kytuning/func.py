@@ -109,4 +109,13 @@ class FUNC(object):
         return None
 
     def call(self, func: dict) -> dict:
+        rdict = {}
+        for funcId, funcParam in func.items():
+            if funcId in self.funcId.keys():
+                ret = self.funcId[funcId](funcParam)
+                rdict[funcId] = ret if ret else funcParam
+            elif type(funcParam) == dict:
+                rdict[funcId] = self.call(funcParam)
+            else:
+                rdict[funcId] = funcParam
         return rdict
