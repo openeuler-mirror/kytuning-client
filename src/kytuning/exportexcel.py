@@ -329,7 +329,7 @@ class BenchMark(object):
                                     else:
                                         self.set_cell_style(
                                             sheet, _row+row_start_idx, col_n,
-                                            cell_str.encode("ascii"),
+                                            cell_str.encode("utf8"),
                                             self.alignment_left,
                                             self.color_data, self.font_data)
                                         break
