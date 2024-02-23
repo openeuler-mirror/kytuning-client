@@ -586,9 +586,6 @@ class Speccpu2006(BenchMark):
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
-        is_new = True
-        idx_col = self.index_start
-        index_start_row = self.index_start
         for k, v in ret_dict["items"].items():
             for _k, _v in v.items():
                 sheet_name = "%s(%s)" % (self.tool_name, _k)
@@ -658,105 +655,21 @@ class Speccpu2017(BenchMark):
                     "657.xz_s",
                     "SPECspeed2017_int"]}}
         self.thread = ["单线程", "多线程"]
-        self.tune = ["base", "paek"]
+        self.tune = ["base", "peak"]
+        self.cols_width = [10, 10, 10, self.ret_col_2_width]
 
-    def set_col_items(self, sheet: Worksheet, tune: str):
-        text_cmd = self.text_cmd
-        text_modify_args = self.text_modify_args
-        point_row = 1
-        sheet.column_dimensions["A"].width = self.ret_col_2_width
-        # 单线程fp开始
-        self.set_cell_style(
-            sheet, point_row, 1, "单线程FP", self.alignment_center,
-            self.color_title, self.font_title)
-        point_row += 1
-        # 执行命令
-        self.set_cell_style(
-            sheet, point_row, 1, text_cmd, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        # 修改参数
-        sheet.row_dimensions[point_row].height = self.ret_row_1_height
-        self.set_cell_style(
-            sheet, point_row, 1, text_modify_args, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        for v in self.items[self.dtype[0]].values():
-            for i, _v in enumerate(v):
-                _v = _v+"_"+tune if i == (len(v)-1) else _v
-                self.set_cell_style(
-                    sheet, point_row, 1, _v, self.alignment_left,
-                    self.color_item_1, self.font_item_1)
-                point_row += 1
-        # 单线程int开始
-        self.set_cell_style(
-            sheet, point_row, 1, "单线程INT", self.alignment_center,
-            self.color_title, self.font_title)
-        point_row += 1
-        # 执行命令
-        self.set_cell_style(
-            sheet, point_row, 1, text_cmd, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        # 修改参数
-        sheet.row_dimensions[point_row].height = self.ret_row_1_height
-        self.set_cell_style(
-            sheet, point_row, 1, text_modify_args, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        for v in self.items[self.dtype[1]].values():
-            for i, _v in enumerate(v):
-                _v = _v+"_"+tune if i == (len(v) - 1) else _v
-                self.set_cell_style(
-                    sheet, point_row, 1, _v, self.alignment_left,
-                    self.color_item_1, self.font_item_1)
-                point_row += 1
-        # 多线程fp开始
-        self.set_cell_style(
-            sheet, point_row, 1, "多线程FP", self.alignment_center,
-            self.color_title, self.font_title)
-        point_row += 1
-        # 执行命令
-        self.set_cell_style(
-            sheet, point_row, 1, text_cmd, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        # 修改参数
-        sheet.row_dimensions[point_row].height = self.ret_row_1_height
-        self.set_cell_style(
-            sheet, point_row, 1, text_modify_args, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        for v in self.items[self.dtype[0]].values():
-            for i, _v in enumerate(v):
-                _v = _v+"_"+tune if i == (len(v) - 1) else _v
-                self.set_cell_style(
-                    sheet, point_row, 1, _v, self.alignment_left,
-                    self.color_item_1, self.font_item_1)
-                point_row += 1
-        # 多线程int开始
-        self.set_cell_style(
-            sheet, point_row, 1, "多线程INT", self.alignment_center,
-            self.color_title, self.font_title)
-        point_row += 1
-        # 执行命令
-        self.set_cell_style(
-            sheet, point_row, 1, text_cmd, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        # 修改参数
-        sheet.row_dimensions[point_row].height = self.ret_row_1_height
-        self.set_cell_style(
-            sheet, point_row, 1, text_modify_args, self.alignment_center,
-            self.color_cmd, self.font_cmd)
-        point_row += 1
-        for v in self.items[self.dtype[1]].values():
-            for i, _v in enumerate(v):
-                _v = _v+"_"+tune if i == (len(v) - 1) else _v
-                self.set_cell_style(
-                    sheet, point_row, 1, _v, self.alignment_left,
-                    self.color_item_1, self.font_item_1)
-                point_row += 1
+    def set_row_header(self, sheet: Worksheet, row_point: int, data: dict):
+        if row_point > sheet.max_row:
+            self.set_cell_style(sheet, row_point, self.col_point_start, data["thread"], self.alignment_center, self.color_item_1, self.font_item_1)
+            self.set_cell_style(sheet, row_point, self.col_point_start + 1, data["type"], self.alignment_center, self.color_item_1, self.font_item_1)
+            self.set_cell_style(sheet, row_point, self.col_point_start + 2, data["tune"], self.alignment_center, self.color_item_1, self.font_item_1)
+            for i, _l in enumerate(self.items[data["type"]][data["tune"]]):
+                self.set_cell_style(sheet, row_point + i, self.col_point_start + 3, _l, self.alignment_left, self.color_item_2, self.font_item_2)
+
+            self.merge_col_cell_by_value(sheet, utils.get_column_letter(self.col_point_start + 2), row_point, row_point + len(self.items[data["type"]][data["tune"]]) - 1, data["tune"])
+            self.merge_col_cell_by_value(sheet, utils.get_column_letter(self.col_point_start + 1), row_point, row_point + len(self.items[data["type"]][data["tune"]]) - 1, data["type"])
+            self.merge_col_cell_by_value(sheet, utils.get_column_letter(self.col_point_start), row_point, row_point + len(self.items[data["type"]][data["tune"]]) - 1, data["thread"])
+        pass
 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name, "items": {}}
@@ -807,9 +720,8 @@ class Speccpu2017(BenchMark):
                         _str = ''
                         if len(temp) > 0:
                             _str = temp[-1].strip()
-                            _thread = (
-                                self.thread[1] if temp[0].strip() > '1' else
-                                self.thread[0])
+                            if not _thread:
+                                _thread = (self.thread[1] if temp[0].strip() > '1' else self.thread[0])
                         else:
                             _str = "NR/RE"
                         _scores_tune[self.tune[j]].append(_str)
@@ -824,62 +736,30 @@ class Speccpu2017(BenchMark):
         return ret_dict
 
     def ret_dict_to_excel(self, workbook: Workbook, ret_dict: dict):
-        is_new = True
-        idx_col = self.index_start
-        index_start_row = self.index_start
         for k, v in ret_dict["items"].items():
             for _k, _v in v.items():
+                sheet_name = "%s(%s)" % (self.tool_name, _k)
+                sheet = None
+                if sheet_name in workbook.sheetnames:  # 已存在sheet
+                    sheet = workbook[sheet_name]
+                else:   # 不存在sheet
+                    sheet = workbook.create_sheet(sheet_name)
+                    self.set_col_items(sheet)
+
                 _thread = k.split("_")[0]
                 _dtype = k.split("_")[1]
                 _tune = k.split("_")[2]
-                idx_start_items = 0
-                if _thread == self.thread[0]:
-                    if _dtype == self.dtype[0]:  # 单线程 fp
-                        idx_start_items = index_start_row+3
-                    else:                                   # 单线程 int
-                        idx_start_items = 32  # 根据模板固定，也可以根据self.items计算
-                elif _thread == self.thread[1]:
-                    if _dtype == self.dtype[0]:  # 多线程fp
-                        idx_start_items = 57
-                    else:                                   # 多线程int
-                        idx_start_items = 85
-                if _tune == "speed":
-                    idx_start_items += len(self.items[_dtype]["rate"])
 
-                sheet = None
-                shee_name = "%s(%s)" % (self.tool_name, _k)
-                if shee_name in workbook.sheetnames:  # 已存在sheet
-                    sheet = workbook[shee_name]
-                else:   # 不存在sheet
-                    sheet = workbook.create_sheet(shee_name)
-                    self.set_col_items(sheet, _k)
-                if is_new:
-                    idx_col = sheet.max_column + 1
-                    is_new = False
-                # 列头
-                if _tune == "rate":
-                    sheet.column_dimensions[utils.get_column_letter(
-                        idx_col)].width = self.ret_col_data_width
-                    self.set_cell_style(
-                        sheet, idx_start_items-3, idx_col,
-                        self.tool_name + '#'+str(idx_col-1),
-                        self.alignment_center, self.color_col_top,
-                        self.font_col_top)
-                    if self.value_cmd:
-                        self.set_cell_style(
-                            sheet, idx_start_items-2, idx_col,
-                            self.value_cmd,
-                            self.alignment_center, self.color_data, self.font_data)
-                    if self.value_modify_args:
-                        self.set_cell_style(
-                            sheet, idx_start_items-1, idx_col,
-                            self.value_modify_args,
-                            self.alignment_center, self.color_data, self.font_data)
+                row_point = self.find_row_point(sheet, {"thread": _thread, "type": _dtype, "tune": _tune})
+                self.set_row_header(sheet, row_point, {"thread": _thread, "type": _dtype, "tune": _tune})
+
+                col_point = self.find_col_point(sheet, row_point)
+                self.set_col_title(sheet, col_point)
 
                 for i, (_, __v) in enumerate(_v.items()):
-                    self.set_cell_style(
-                        sheet, idx_start_items+i,
-                        idx_col, __v, self.alignment_center)
+                    self.set_cell_style(sheet, row_point + i, col_point, __v,
+                                        self.alignment_center, self.color_data, self.font_data)
+
         return True
 
 
