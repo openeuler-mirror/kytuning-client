@@ -29,7 +29,6 @@ class BaseTest(object):
         return self.project
 
     def prepare(self):
-        self.envmgr = EnvManager()
         self.depmgr = DependencyManager(self.scheme.get_rpm_list())
         self.report = Report(self.scheme.get_base_path())
         self.report.path_init()
@@ -134,8 +133,38 @@ class BaseTest(object):
             return self.result 
         return ''
 
-    def export(self):
-        self.report.export_result()
+    def _backup_result(self):
+        for fold in self.result_folder:
+            if not os.path.exists(fold):
+                continue
+            ret_raw_path = self.scheme.get_ret_raw_path()
+            if ret_raw_path is not None and len(ret_raw_path) > 0:
+                subproc_call("cp -rf {ret_folder}/* {ret_raw_path}/".format(ret_folder = fold, ret_raw_path = ret_raw_path))
+            ret_path = self.scheme.get_ret_path()
+            if ret_path is not None and len(ret_path) > 0:
+                subproc_call("  rm -f {ret_path}/kytuning-result.xlsx;                       \
+                                ret_file=\"$(find ../results/ -name '*.xlsx' | tail -n 1)\"; \
+                                cp \"$ret_file\" {ret_path}/".format(ret_path = ret_path))
+            break
+        pass
+
+    def _export_result(self, data: dict):
+        if self.report_data["env"] is not None and self.report_data["env_export"] == False:
+            self.report.save_env_data(self.report_data["env"])
+            self.report_data["env_export"] = True
+        self.report.save_result(data["name"], data["tinf"], data["data"])
+        self.report_data["datas"].append(data)
+
+    def export(self, rpath = None):
+        if rpath is not None:
+            self.report.current_report_file = rpath
+            if self.report_data["env"]:
+                self.report.save_env_data(self.report_data["env"])
+            if len(self.report_data["datas"]) > 0:
+                for data in self.report_data["datas"]:
+                    self.report.save_result(data["name"], data["tinf"], data["data"], only_xlsx = True)
+        pass
+
 
 class UnixbenchTest(BaseTest):
     def __init__(self, scheme=None):
@@ -367,8 +396,7 @@ class SpecCPU2017Test(BaseTest):
         #return data
 
 class TestFactory(object):
-    def __init__(self):
-        self.data = { 
+    __data = { 
                 'unixbench' : UnixbenchTest, 
                 'lmbench' : LmbenchTest,
                 'fio' : FioTest,
@@ -377,7 +405,8 @@ class TestFactory(object):
                 'specjvm2008' : SpecJVM2008Test,
                 'speccpu2006' : SpecCPU2006Test,
                 'speccpu2017' : SpecCPU2017Test,
-                'netperf'   : NetPerfTest,}
+                'netperf'   : NetPerfTest,
+            }
 
     def get_test_class(self, key):
         if key:
