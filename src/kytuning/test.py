@@ -34,11 +34,72 @@ class BaseTest(object):
         self.report = Report(self.scheme.get_base_path())
         self.report.path_init()
 
+    def _collect_env(self):
+        try:
+            data = EnvManager().collect()
+            if data:
+                self.report_data["env"] = data
+        except:
+            logging.warn('collect env failed.')
+        pass
 
-    def collect_env(self): 
-        data = self.envmgr.collect()
-        if data:
-            self.report.save_env_data(data)
+    def _install_dependent_rpms(self):
+        try:
+            self.depmgr.install()
+        except:
+            logging.warn('install dependent rpms failed.')
+        pass
+
+    def _remove_dependent_rpms(self):
+        try:
+            self.depmgr.uninstall()
+        except:
+            logging.warn('uninstall dependent rpms failed.')
+        pass
+
+    def _setup_config(self):
+        try:
+            for item in self.scheme.get_configs():
+                item.setup()
+        except:
+            logging.warn('setup config failed.')
+        pass
+
+    def _reset_config(self):
+        try:
+            for item in self.scheme.get_configs():
+                item.reset()
+        except:
+            logging.warn('reset config failed.')
+        pass
+
+    def _do_testcase(self, tcase):
+        try:
+            tcase.save_config()
+            tcase.setup_config()
+            tcase.build()
+            maxit = self.scheme.get_maxiterations()
+            for idx in range(maxit):
+                logging.info("###### run testcase\'s {idx}/{maxit} times...".format(idx=idx+1, maxit=maxit))
+
+                self.result = tcase.run()
+                name = '{name}-{idx}'.format(name=tcase.name, idx=idx)
+                tinf = self.scheme.to_data()
+                tinf['testcase'] = tcase.to_data()
+                data = self.find_and_read_result()
+                self._export_result({"name": name, "tinf": tinf, "data": data})
+
+                logging.info("###### run testcase\'s {idx}/{maxit} times done".format(idx=idx+1, maxit=maxit))
+        except TestCaseError as e:
+            logging.error(e)
+            raise e
+        except Exception as e:
+            logging.error(e)
+            raise e
+        finally:
+            tcase.clean()
+            tcase.reset_config()
+        pass
 
     def install_dependent_rpms(self):
         self.depmgr.install()
@@ -153,6 +214,29 @@ class LmbenchTest(BaseTest):
 class FioTest(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./results"]
+
+    def find_and_read_result(self):
+        data = None
+        save = None
+        tdir = './results'
+        for item in os.listdir(tdir):
+            path = '{tdir}/{item}'.format(tdir=tdir, item=item)
+            stat = os.stat('{tdir}/{item}'.format(tdir=tdir, item=item))
+            if save is None:
+                save = (path, stat)
+            else:
+                if stat.st_mtime >= save[1].st_mtime:
+                    save = (path, stat)
+        # for item in os.listdir(save[0]):
+        #     save = '{subdir}/{item}'.format(subdir=save[0], item=item)
+        # if save:
+        #     with open(save) as fp:
+        #         data = fp.read()
+        if save:
+            with open(save[0]) as fp:
+                data = fp.read()
+        return data
 
 
 class IoZoneTest(BaseTest):
