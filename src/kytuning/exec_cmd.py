@@ -60,7 +60,7 @@ class ExecCmd(object):
         else:
             self.stoptime = sys.maxsize
         if timeout is not None and timeout <= 0:
-            logger.error("Timeout reached not to spawn a task")
+            logging.error("Timeout reached not to spawn a task")
             self.sp = None
         else:
             self.sp = subprocess.Popen(
