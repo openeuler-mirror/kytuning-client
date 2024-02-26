@@ -1,25 +1,33 @@
 __all__ = [ 'Main' ]
 
-import sys
+import sys, getopt, os, time
 
 from .logger import *
-from .scheme import *
+from .scheme import subproc_call, SchemeError, SchemeParserError, TestCaseError
 from .test import *
 from .error import *
-
+from .config import *
 
 class Main(object):
     def __init__(self):
-        self.test= None
+        # 载入配置文件
+        self.config = KYConfig().load()
 
-    def run(self): 
+    def __parse_argv(self):
         if len(sys.argv) < 2: 
             print('input scheme path.') 
             sys.exit()
 
-        path = sys.argv[1] 
-        if path is None or len(path) == 0: 
-            print('invalid scheme path : "%s"' % path) 
+        opts, args = getopt.getopt(sys.argv[1:], "hf:", ["help", "report_path="])
+        for o, a in opts:
+            if o in ("-h", "--help"):
+                sys.exit()
+            elif o in ("-f", "--report_path"):
+                self.config.add({'main':{'report_path': a}})
+            pass
+
+        if len(args) == 0:
+            print('input scheme path.')
             sys.exit()
 
         with open(path, 'r') as f: 
