@@ -30,25 +30,47 @@ class Main(object):
             print('input scheme path.')
             sys.exit()
 
-        with open(path, 'r') as f: 
+        for file in args:
+            if file is None or len(file) == 0:
+                print('invalid scheme path : "%s"' % file)
+                sys.exit()
+            if not os.path.exists(file):
+                print("scheme not found: \"%s\"" % file)
+                sys.exit()
+
+        return args
+
+    def run(self): 
+        # 解析参数
+        paths = self.__parse_argv()
+        # do test
+        cpaths = len(paths)
+        for idx in range(cpaths):
             try:
-                scheme = SchemeParser().parse(f) 
-                scheme.prepare()
+                test = TestFactory().get(paths[idx])
+                test.prepare()
+                test.do_test()
+                test.export(self.config.report_path)
             except SchemeError as e:
                 print(e)
                 sys.exit()
             except SchemeParserError as e:
                 print(e)
-                sys.exit() 
-        try:
-            self.test = TestFactory().get_test_object(scheme.get_test_type(), scheme)
-            self.test.prepare() 
-        except TestNotFound as e:
-            logging.error(e)
-            sys.exit()
-        except SchemeError as e:
-            logging.error(e)
-            sys.exit()
+            except TestNotFound as e:
+                logging.error(e)
+            except TestCaseError as e:
+                logging.error(e)
+            except Exception as e:
+                logging.error(e)
+            except BaseException as e:
+                logging.error(e)
+            finally:
+                if (cpaths > 1) and ((idx + 1) < cpaths):
+                    subproc_call("echo 3 > /proc/sys/vm/drop_caches")
+                    time.sleep(10)
+        pass
+
+        logging.info('all tests are finshed.')
 
         try:
             self.test.collect_env() 
