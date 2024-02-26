@@ -14,6 +14,21 @@ class KYConfig(object):
         pass
 
     def load(self, cpath = None):
+        global conf_data
+        if cpath is not None:
+            self.conf_path.insert(0, cpath)
+        for path in self.conf_path:
+            if path is None:
+                continue
+            if os.path.exists(path):
+                data = None
+                with open(path, 'r') as f:
+                    data = yaml.load(f, yaml.FullLoader)
+                if data is None:
+                    print("load config error")
+                    continue
+                conf_data = data
+                break
         return self if conf_data is not None else None
 
     def add(self, conf: dict):
