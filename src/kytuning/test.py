@@ -6,7 +6,8 @@ from .error import *
 from .report import *
 from .getenv import EnvManager 
 from .dependency import DependencyManager 
-
+from .scheme import subproc_call 
+from .config import KYConfig
 
 __all__ = [ 'TestFactory', 'UnixbenchTest', 'LmbenchTest', 'TestNotFound']
 
@@ -16,11 +17,13 @@ class TestNotFound(Exception):
 
 class BaseTest(object):
     def __init__(self, scheme=None):
+        self.config = KYConfig()
         self.scheme = scheme
-        self.envmgr = None
         self.depmgr = None
         self.report = None
-        self.result = None 
+        self.result = None
+        self.result_folder = [] # ["./results", "./result"]
+        self.report_data = {"env": None, "env_export": False, "datas": []}
 
     def __str__(self):
         return self.project
@@ -52,33 +55,19 @@ class BaseTest(object):
             item.reset()
 
     def do_test(self):
-        total = len(self.scheme.testcases)
-        maxit = self.scheme.get_maxiterations()
-        for tidx in range(total):
-            t = self.scheme.testcases[tidx]
-            for idx in range(maxit):
-                logging.info("#### run {tidx}/{total} testcase\'s {idx}/{maxit} times...".format(
-                    tidx=tidx+1, total=total, idx=idx+1, maxit=maxit))
-                try:
-                    t.save_config()
-                    t.setup_config()
-                    t.build()
-                    self.result = t.run()
-                    name = '{name}-{idx}'.format(name=t.name, idx=idx)
-                    tinf = self.scheme.to_data()
-                    tinf['testcase'] = t.to_data()
-                    data = self.find_and_read_result()
-                    self.report.save_result(name, tinf, data)
-                except TestCaseError as e:
-                    logging.error(e)
-                    raise e
-                except Exception as e:
-                    logging.error(e)
-                    raise e
-                finally:
-                    t.clean()
-                    t.reset_config()
-                    logging.info("#### run {tidx}/{total} testcase\'s {idx}/{maxit} times done".format(tidx=tidx+1, total=total, idx=idx+1, maxit=maxit))
+        self._collect_env()
+        self._install_dependent_rpms()
+        self._setup_config()
+        try:
+            self._do_testcases()
+        except Exception as e:
+            raise e
+        finally:
+            self._backup_result()
+            self._reset_config()
+            self._remove_dependent_rpms()
+        pass
+
     def find_and_read_result(self):
         if self.result:
             return self.result 
