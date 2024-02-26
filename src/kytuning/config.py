@@ -36,6 +36,17 @@ class KYConfig(object):
         extra_data.update(conf)
 
     def get(self, keys: list):
+        global extra_data, conf_data
+        if keys is not None and len(keys) > 0:
+            for tconf in [extra_data, conf_data]:
+                for k in keys:
+                    if k in tconf:
+                        tconf = tconf[k]
+                    else:
+                        tconf = None
+                        break
+                if tconf is not None:
+                    return tconf
         return None
 
     def get_main(self, key):
