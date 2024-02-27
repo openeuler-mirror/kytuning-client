@@ -271,6 +271,33 @@ class FioTest(BaseTest):
 class IoZoneTest(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./result"]
+
+    def _check_testcase(self, tcase):
+        for m in ['half', 'full', 'double']:
+            if (tcase.test_cmd.find(m)) != -1:
+                return False
+        return True
+
+    def find_and_read_result(self):
+        data = None
+        save = None
+        tdir = './result'
+        for item in os.listdir(tdir):
+            if item.endswith('.log') is False:
+                continue
+            path = '{tdir}/{item}'.format(tdir=tdir, item=item)
+            stat = os.stat('{tdir}/{item}'.format(tdir=tdir, item=item))
+            if save is None:
+                save = (path, stat)
+            else:
+                if stat.st_mtime >= save[1].st_mtime:
+                    save = (path, stat)
+        if save:
+            with open(save[0]) as fp:
+                data = fp.read()
+        return data
+
 
 class NetPerfTest(BaseTest):
     def __init__(self, scheme=None):
