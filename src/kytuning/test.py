@@ -100,19 +100,21 @@ class BaseTest(object):
             tcase.reset_config()
         pass
 
-    def install_dependent_rpms(self):
-        self.depmgr.install()
+    def _check_testcase(self, tcase):
+        return True
 
-    def remove_dependent_rpms(self):
-        self.depmgr.uninstall()
+    def _do_testcases(self):
+        total = len(self.scheme.testcases)
+        for tidx in range(total):
+            if self._check_testcase(self.scheme.testcases[tidx]) is not True:
+                continue
 
-    def setup_config(self):
-        for item in self.scheme.get_configs():
-            item.setup()
+            logging.info("#### run {tidx}/{total} testcase start".format(tidx=tidx+1, total=total))
 
-    def reset_config(self):
-        for item in self.scheme.get_configs():
-            item.reset()
+            self._do_testcase(self.scheme.testcases[tidx])
+
+            logging.info("#### run {tidx}/{total} testcase done".format(tidx=tidx+1, total=total))
+        pass
 
     def do_test(self):
         self._collect_env()
