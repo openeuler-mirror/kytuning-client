@@ -171,6 +171,7 @@ class BaseTest(object):
 class UnixbenchTest(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./results"]
 
     def find_and_read_result(self):
         data = None
@@ -192,9 +193,11 @@ class UnixbenchTest(BaseTest):
                 data = fp.read()
         return data
 
+
 class StreamTest(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./results"]
 
     def compare_and_return_newer(self, a, b):
         if a is None:
@@ -231,6 +234,7 @@ class StreamTest(BaseTest):
 class LmbenchTest(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./results_last"]
 
     def find_and_read_result(self):
         data = ''
@@ -309,6 +313,7 @@ class NetPerfTest(BaseTest):
 class SpecJVM2008Test(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./results"]
 
     def find_and_read_result(self):
         data = None
