@@ -435,12 +435,19 @@ class TestFactory(object):
                 'netperf'   : NetPerfTest,
             }
 
-    def get_test_class(self, key):
-        if key:
-            return self.data.get(key.lower())
+    def __init__(self):
+        pass
 
-    def get_test_object(self, key, scheme):
-        cls = self.get_test_class(key)
-        if cls is None:
+    def get(self, path):
+        with open(path, 'r') as f: 
+            scheme = SchemeParser().parse(f) 
+            scheme.prepare()
+
+            key = scheme.get_test_type()
+            if key:
+                test = self.__data.get(key.lower())
+                if test is not None:
+                    return test(scheme)
             raise TestNotFound("no test named \'%s\'" % key)
-        return cls(scheme)
+        raise TestNotFound("file open failed \'%s\'" % path)
+
