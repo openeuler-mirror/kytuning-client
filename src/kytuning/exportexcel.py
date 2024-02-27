@@ -1253,10 +1253,9 @@ class Fio(BenchMark):
                         if rv.value == ret_dict["items"]["bs"]:
                             return row[self.col_point_start - 1].row
         return sheet.max_row + 1
- 
+
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name}
-        units = {"k":1e3, "M":1e6, "G":1e9}
         _file_lines = None
         _rw = None
         with open(file, "r") as f:
@@ -1289,10 +1288,6 @@ class Fio(BenchMark):
             if all(_f in line for _f in _flags_list):
                 _regx = r'(?<=IOPS=).*,'
                 _iops = re.findall(_regx, line)[0][:-1]
-                for unit in units:
-                    if unit in _iops:
-                        _iops = float(_iops.replace(unit, '')) * units[unit]
-                        break
                 _regx = r'(?<=BW=).*\)'
                 _bw_io = re.findall(_regx, line)
                 _bw_list = _bw_io[0].split(")")[0].split("(")
