@@ -53,7 +53,6 @@ class Main(object):
                 test.export(self.config.report_path)
             except SchemeError as e:
                 print(e)
-                sys.exit()
             except SchemeParserError as e:
                 print(e)
             except TestNotFound as e:
