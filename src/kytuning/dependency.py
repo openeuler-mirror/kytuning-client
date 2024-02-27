@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 from .exec_cmd import ExecCmd
@@ -14,7 +15,7 @@ class DependencyManager(object):
     def __init__(self, rpmlist = []):
         self.rpmlist = rpmlist
 
-        # already instal, dont install again
+        # already install, dont install again
         self.dont_install = []
 
         # not install, need  to install
@@ -33,7 +34,7 @@ class DependencyManager(object):
         self.fail_uninstall = []
 
         if rpmlist == None:
-            return
+            raise Exception("The len of rpmlist is 0")
 
         for rpm in rpmlist:
             installed = self.check_install(rpm)
