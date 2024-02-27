@@ -335,6 +335,7 @@ class SpecJVM2008Test(BaseTest):
 class SpecCPU2006Test(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./result"]
 
     def find_and_read_result(self):
         data = None
@@ -377,6 +378,7 @@ class SpecCPU2006Test(BaseTest):
 class SpecCPU2017Test(BaseTest):
     def __init__(self, scheme=None):
         BaseTest.__init__(self, scheme)
+        self.result_folder = ["./result"]
 
     def find_and_read_result(self):
         data = None
