@@ -1375,7 +1375,7 @@ class ExportXlsx(object):
             self, tool_name: str, ret_path: str, cmd: str, argv: str) -> list:
         ret_dict_list = []
         for file in self.get_files(ret_path):
-            ret_dict = self.ret_to_dict(tool_name, file)
+            ret_dict = self.ret_to_dict(tool_name, file, cmd , argv)
             if ret_dict is None:
                 continue
             ret_dict_list.append(ret_dict)
