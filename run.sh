@@ -121,6 +121,11 @@ function download() {
 			handle_single_benchmark ${tools_path} cpu2017.tar "${file_server}"	
 		fi
 		;;
+	jvm2008)
+		if [ ! -f ${tools_path}/SPECjvm2008_1_01_setup.jar ]; then
+			handle_single_benchmark ${tools_path} jvm2008.tar "${file_server}"	
+		fi
+		;;
 	*)
 		echo "无法下载${benchmark}, 目前尚未支持该工具"
 		exit 1
@@ -135,6 +140,8 @@ function handle_tarfile() {
     tar -xvf ${tools_path}/lmbench.tar -C ${tools_path}
     tar -xvf ${tools_path}/cpu2006.tar -C ${tools_path}
     tar -xvf ${tools_path}/cpu2017.tar -C ${tools_path}
+    tar -xvf ${tools_path}/jvm2008.tar -C ${tools_path}
+
 }
 
 install_dependencies() {
