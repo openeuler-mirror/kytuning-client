@@ -14,6 +14,17 @@ opt_use_net=
 
 # 初始本文件头部定义的变量
 function init() {
+	base_dir=`grep base_path conf/kytuning.yaml |cut -d':' -f 2|sed 's/\"//g'`
+	run_dir=$base_dir/run
+	
+	cur_path=$(cd $(dirname $0); pwd)
+	tools_path=$cur_path/tools
+
+	if [ ! -d ${tools_path} ]; then
+		mkdir ${tools_path} 
+	fi
+	
+	opt_use_net=0
 }
 
 # 显示使用帮助
