@@ -42,7 +42,47 @@ function usage() {
 
 # 解析命令行参数
 function parse_cmd() {
+	while getopts "f:h" opt; do
+	#echo $opt $OPTARG
+		case $opt in
+		f)
+			run "$rk_benchmark" $OPTARG
+			exit 0
+			;;
+		v)
+			usage
+			exit 0
+			;;
+		*)
+			usage	
+			exit 1
+			;;
+		esac
+	done
+	usage 
 	exit 1	
+}
+
+# 下载lmbench.tar cpu2006.tar cpu2017.tar jvm2008.tar需要单独处理
+# 接受3个参数, $1是tar文件所在目录，$2是tar文件, $3是文件服务器
+function handle_single_benchmark() {
+	local var_path=$1
+	local var_file=$2
+	local var_server=$3
+
+	wget -P ${var_path} ${var_server}${var_file}
+	if [ $? -ne 0 ]; then
+		echo "下载${var_file}失败"
+		exit 1
+	fi
+	
+	tar xvf ${var_path}/${var_file} -C ${var_path}
+	if [ $? -eq 0 ]; then
+		rm -f ${var_path}/${var_file}	
+	else
+		echo "解包文件失败：${var_path}/${var_file}"
+		exit 1
+	fi 
 }
 
 # 从网络下载benchmark工具，接受一个参数
@@ -53,6 +93,11 @@ function download() {
 	unixbench)
 		if [ ! -f ${tools_path}/UnixBench5.1.3-1.tar.gz ]; then
 			wget -P ${tools_path} ${file_server}UnixBench5.1.3-1.tar.gz
+		fi
+		;;
+	lmbench)
+		if [ ! -f ${tools_path}/lmbench-3.0-a9-1.tar.bz2 ]; then
+			handle_single_benchmark ${tools_path} lmbench.tar "${file_server}"	
 		fi
 		;;
 	*)
@@ -66,6 +111,8 @@ function download() {
 # 如果在命令行中使用-f制定了本地文件，或者在user.cfg配置了本地文件，调用该函数处理
 function handle_tarfile() {
 	tar xv --skip-old-files -f $1  
+    tar -xvf ${tools_path}/lmbench.tar -C ${tools_path}
+
 }
 
 install_dependencies() {
