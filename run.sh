@@ -100,6 +100,16 @@ function download() {
 			handle_single_benchmark ${tools_path} lmbench.tar "${file_server}"	
 		fi
 		;;
+	stream)
+		if [ ! -f ${tools_path}/stream-5.9-1.tar.bz2 ]; then
+			wget -P ${tools_path} ${file_server}stream-5.9-1.tar.bz2
+		fi
+		;;
+	fio)
+		if [ ! -f ${tools_path}/fio-3.20.tar.bz2 ]; then
+			wget -P ${tools_path} ${file_server}fio-3.20.tar.bz2
+		fi
+		;;
 	*)
 		echo "无法下载${benchmark}, 目前尚未支持该工具"
 		exit 1
