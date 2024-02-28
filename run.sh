@@ -110,6 +110,17 @@ function download() {
 			wget -P ${tools_path} ${file_server}fio-3.20.tar.bz2
 		fi
 		;;
+	cpu2006)
+		if [ ! -f ${tools_path}/cpu2006-1.2-pf01.iso  ]; then
+			handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"	
+		fi
+		;;
+	cpu2017)
+		if [ ! -f ${tools_path}/cpu2017-1_0_5.iso ]; then
+			wget -P ${tools_path} ${file_server}cpu2017.tar
+			handle_single_benchmark ${tools_path} cpu2017.tar "${file_server}"	
+		fi
+		;;
 	*)
 		echo "无法下载${benchmark}, 目前尚未支持该工具"
 		exit 1
@@ -122,7 +133,8 @@ function download() {
 function handle_tarfile() {
 	tar xv --skip-old-files -f $1  
     tar -xvf ${tools_path}/lmbench.tar -C ${tools_path}
-
+    tar -xvf ${tools_path}/cpu2006.tar -C ${tools_path}
+    tar -xvf ${tools_path}/cpu2017.tar -C ${tools_path}
 }
 
 install_dependencies() {
