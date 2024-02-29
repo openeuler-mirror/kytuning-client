@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source conf/user.cfg
+ARCH=$(arch)
+WGET_BIN="wget -c -P"
 
 # 本文件使用的变量
 base_dir=
@@ -70,7 +72,7 @@ function handle_single_benchmark() {
 	local var_file=$2
 	local var_server=$3
 
-	wget -P ${var_path} ${var_server}${var_file}
+	${WGET_BIN} ${var_path} ${var_server}${var_file}
 	if [ $? -ne 0 ]; then
 		echo "下载${var_file}失败"
 		exit 1
@@ -92,7 +94,7 @@ function download() {
 	case ${benchmark} in
 	unixbench)
 		if [ ! -f ${tools_path}/UnixBench5.1.3-1.tar.gz ]; then
-			wget -P ${tools_path} ${file_server}UnixBench5.1.3-1.tar.gz
+			${WGET_BIN} ${tools_path} ${file_server}UnixBench5.1.3-1.tar.gz
 		fi
 		;;
 	lmbench)
