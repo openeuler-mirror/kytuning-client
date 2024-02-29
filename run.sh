@@ -104,27 +104,29 @@ function download() {
 		;;
 	stream)
 		if [ ! -f ${tools_path}/stream-5.9-1.tar.bz2 ]; then
-			wget -P ${tools_path} ${file_server}stream-5.9-1.tar.bz2
+			${WGET_BIN} ${tools_path} ${file_server}stream-5.9-1.tar.bz2
 		fi
 		;;
 	fio)
 		if [ ! -f ${tools_path}/fio-3.20.tar.bz2 ]; then
-			wget -P ${tools_path} ${file_server}fio-3.20.tar.bz2
+			${WGET_BIN} ${tools_path} ${file_server}fio-3.20.tar.bz2
 		fi
 		;;
 	iozone)
 		if [ ! -f ${tools_path}/iozone3_430.tar ]; then
-			wget -P ${tools_path} ${file_server}iozone3_430.tar
+			${WGET_BIN} ${tools_path} ${file_server}iozone3_430.tar
 		fi
 		;;
 	cpu2006)
-		if [ ! -f ${tools_path}/cpu2006-1.2-pf01.iso  ]; then
-			handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"	
+		if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/"cpu2006-1.2-pf01.iso" ]]; then
+			handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"
+		elif [[ "${ARCH}" == "loongarch64" &&  ! -f ${tools_path}/cpu2006-v1.1-lg64.tar.gz ]];then
+			${WGET_BIN} ${tools_path} ${file_server}cpu2006-v1.1-lg64.tar.gz
 		fi
 		;;
 	cpu2017)
 		if [ ! -f ${tools_path}/cpu2017-1_0_5.iso ]; then
-			wget -P ${tools_path} ${file_server}cpu2017.tar
+			${WGET_BIN} ${tools_path} ${file_server}cpu2017.tar
 			handle_single_benchmark ${tools_path} cpu2017.tar "${file_server}"	
 		fi
 		;;
