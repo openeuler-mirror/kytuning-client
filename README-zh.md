@@ -15,7 +15,7 @@ kytuning 初期计划支持基准测试工具如下：
 #### 软件架构
 kytuning测试系统整体架构中主要三个角色：目标测试机，kytuning测试系统服务，web管理客户端。
 kytuning-client 是作为目标测试机运行的软件, 其内部流程如下：
-![图1](.\\imgs\\kytuning-client流程图.png)
+![图1](./imgs/kytuning-client流程图.png)
     
 
 
