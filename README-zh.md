@@ -1,10 +1,23 @@
 # kytuning-client
 
 #### 介绍
-    在OS基准性能优化过程中，常面临基准测试工具多样、数据对比繁琐，缺少高效的工具用于性能问题分析。kytuning 提供一个工具帮助完成繁琐重复性的工作释放人力，让工程师专注于性能问题的分析解决。
+在OS基准性能优化过程中，常面临基准测试工具多样、数据对比繁琐，缺少高效的工具用于性能问题分析。kytuning 提供一个工具帮助完成繁琐重复性的工作释放人力，让工程师专注于性能问题的分析解决。
+    kytuning 初期计划支持基准测试工具如下：
+    - unixbench
+    - lmbench
+    - fio
+    - iozone
+    - specjvm2008
+    - stream
+    - speccpu2006
+    - speccpu2017
 
 #### 软件架构
-    kytuning测试系统整体架构中主要三个角色：目标测试机，kytuning测试系统服务，web管理客户端。
+kytuning测试系统整体架构中主要三个角色：目标测试机，kytuning测试系统服务，web管理客户端。
+kytuning-client 是作为目标测试机运行的软件, 其内部流程如下：
+![图1](.\\imgs\\kytuning-client流程图.png)
+    
+
 
 #### 安装教程
 
