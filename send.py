@@ -3,6 +3,10 @@ import requests
 import platform
 
 json_file="/root/kytuning/all_json_file.json"
+project_name="麒麟自测1"
+arm=platform.uname().processor
+os_version="0524"
+user_name = "李四"
 
 
 # 读取 JSON 文件
@@ -11,8 +15,8 @@ with open(json_file, 'r') as f:
         # 将 JSON 字符串解析为 Python 对象
         data = json.loads(json_data)
         # 向 Python 对象中添加新的键值对
-        data['user_name'] = "test"
-        data['project_name'] = "test"
+        data['user_name'] = user_name
+        data['project_name'] = project_name
         data['arm'] = arm
         data['os_version'] = os_version
         # 将 Python 对象编码为新的 JSON 字符串
