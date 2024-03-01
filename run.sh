@@ -98,7 +98,7 @@ function download() {
 		fi
 		;;
 	lmbench)
-		if [ ! -f ${tools_path}/lmbench-3.0-a9-1.tar.bz2 ]; then
+		if [ ! -f ${tools_path}/lmbench-3.0-a9-2.tar.bz2 ]; then
 			handle_single_benchmark ${tools_path} lmbench.tar "${file_server}"	
 		fi
 		;;
@@ -221,9 +221,13 @@ function run() {
 
     # Run kytuning
     for bc in $rk_benchmark; do
-        cd $cur_path        
+        cd $cur_path
+		if [[ ${bc} == "cpu2006" && ${ARCH} == "loongarch64" ]]; then
+			  bc=${bc}-${ARCH}
+		fi 
         if [ -f $cur_path/yaml-base/$bc-base.yaml ]; then
             python3 $cur_path/src/kytuning.py $cur_path/yaml-base/$bc-base.yaml
+			sync
             echo 3 > /proc/sys/vm/drop_caches
             sleep 10
         fi
