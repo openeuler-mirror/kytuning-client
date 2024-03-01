@@ -189,8 +189,8 @@ install_dependencies() {
 		test ! "${packages_dict[jvm2008]}x" == "x" && packages_dict[jvm2008]="openjdk-8-jre-headless"
 		test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"	
     fi
-    
-    for package in $packages; do
+	
+    for package in ${packages_dict[@]}; do
         if ! $packages_manager $package > /dev/null; then
             $packages_manager_install install -y $package
         fi
@@ -199,10 +199,6 @@ install_dependencies() {
             exit 1
         fi
     done
-	
-	if [ ! -e /lib64/libnsl.so.1 ]; then
-		test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
-	fi
 
     # install python modules
 }
@@ -237,11 +233,10 @@ function run() {
 		echo "安装benchmark到${base_dir}/tools"
     fi
 		
-    #安装benchmark依赖
-    install_dependencies
-
     # Run kytuning
     for bc in $rk_benchmark; do
+		#安装benchmark依赖
+		install_dependencies ${bc}
         cd $cur_path
 		if [[ ${bc} == "cpu2006" && ${ARCH} == "loongarch64" ]]; then
 			  bc=${bc}-${ARCH}
