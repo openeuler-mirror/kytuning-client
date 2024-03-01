@@ -120,8 +120,8 @@ function download() {
 	cpu2006)
 		if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/"cpu2006-1.2-pf01.iso" ]]; then
 			handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"
-		elif [[ "${ARCH}" == "loongarch64" &&  ! -f ${tools_path}/cpu2006-v1.1-lg64.tar.gz ]];then
-			${WGET_BIN} ${tools_path} ${file_server}cpu2006-v1.1-lg64.tar.gz
+		elif [[ "${ARCH}" == "loongarch64" &&  ! -f ${tools_path}/cpu2006-1.2-lg64.tar.gz ]];then
+			${WGET_BIN} ${tools_path} ${file_server}cpu2006-1.2-lg64.tar.gz
 		fi
 		;;
 	cpu2017)
