@@ -158,15 +158,36 @@ install_dependencies() {
     local packages=""
     local packages_manager=""
     local packages_manager_install=""
+	local bc=$1
+	declare -A packages_dict ## keys:benchmark values:packages
+	packages_dict[all_dep]="python3"
+	case ${bc} in 
+		unixbench)
+			packages_dict[unixbench]="perl-Time-HiRes"
+			;;
+		lmbench)
+			packages_dict[lmbench]="expect libtirpc-devel"
+			;;
+		cpu2006 | cpu2017)
+			packages_dict[cpu20xx]="gcc-c++ gcc-gfortran"
+			if [ ! -e /lib64/libnsl.so.1 ]; then
+				test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
+			fi
+			;;
+		jvm2008)
+			packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
+			;;
+	esac
     if [ `command -v yum` ];then
         packages_manager="rpm -q"
         packages_manager_install="yum"
-        packages="expect perl-Time-HiRes python3 libtirpc-devel java-1.8.0-openjdk-devel gcc-c++ gcc-gfortran"
-		test ${opt_use_net} -eq 1 && packages+=" python3-pip libnsl"	
+		test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"	
     elif [ `command -v apt-get` ];then
         packages_manager="dpkg -s"
         packages_manager_install="sudo apt-get"
-        packages="expect python3 python3-pip g++ gfortran openjdk-8-jre-headless"
+		test ! "${packages_dict[cpu20xx]}x" == "x" && packages_dict[cpu20xx]="g++ gfortran"
+		test ! "${packages_dict[jvm2008]}x" == "x" && packages_dict[jvm2008]="openjdk-8-jre-headless"
+		test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"	
     fi
     
     for package in $packages; do
