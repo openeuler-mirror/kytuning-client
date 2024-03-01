@@ -190,7 +190,7 @@ class HardwareInfo:
                 # 分区类型
                 "part_type": self.get_parttable_type('/dev/' + blk['name']),
                 # 获取厂商
-                "vendor": blk["vendor"].strip(),
+                "vendor": blk["vendor"].strip() if blk["vendor"] else "Null",
                 # 磁盘模式
                 "model": blk["model"],
                 # 空间大小
