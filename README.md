@@ -1,10 +1,25 @@
 # kytuning-client
 
-#### Description
-Operating system benchmark performance tuning analysis tool-client
+#### Introduction
+
+In the process of OS benchmark performance optimization, there are often  various benchmarking tools, cumbersome data comparison, and a lack of  efficient tools for performance problem analysis. Kytuning provides a  tool to help complete tedious and repetitive tasks, freeing up manpower  and allowing engineers to focus on analyzing and solving performance  problems. 
+
+Kytuning initially plans to support the following benchmarking tools: 
+
+- unixbench
+- lmbench
+- fio
+- iozone
+- specjvm2008
+- stream
+- speccpu2006
+- speccpu2017
 
 #### Software Architecture
-Software architecture description
+There are three main roles in the overall architecture of the KyTuning test  system: the target test machine, the KyTuning test system service, and  the web management client. 
+kytuning-client is software that runs as a target tester, and its internal process is as follows: 
+
+![图1](./imgs/kytuning-client流程图.png)
 
 #### Installation
 
