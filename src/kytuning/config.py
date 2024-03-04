@@ -14,11 +14,6 @@ class KYConfig(object):
         pass
 
     def load(self, cpath = None):
-        """
-        加载conf_path配置文件
-        :param cpath: 额外的配置文件
-        :return:
-        """
         global conf_data
         if cpath is not None:
             self.conf_path.insert(0, cpath)
@@ -37,20 +32,10 @@ class KYConfig(object):
         return self if conf_data is not None else None
 
     def add(self, conf: dict):
-        """
-        增加额外数据
-        :param conf:字典类型的数据
-        :return:
-        """
         global extra_data
         extra_data.update(conf)
 
     def get(self, keys: list):
-        """
-        获取配置文件数据和额外数据
-        :param keys:
-        :return:
-        """
         global extra_data, conf_data
         if keys is not None and len(keys) > 0:
             for tconf in [extra_data, conf_data]:
