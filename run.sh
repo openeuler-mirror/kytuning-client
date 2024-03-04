@@ -3,6 +3,7 @@
 source conf/user.cfg
 ARCH=$(arch)
 WGET_BIN="wget -c -P"
+UPLOAD="True"
 
 # 本文件使用的变量
 base_dir=
@@ -257,6 +258,9 @@ function main() {
 
 	if [ $# -eq 0 ]; then
 		run "$rk_benchmark"
+		if [ $? -eq 0 ] && [ $UPLOAD="true" ] ;then
+		    python3 ./send.py
+		fi
 	else
 		parse_cmd $@
 	fi
