@@ -30,7 +30,9 @@ class BaseTest(object):
 
     def prepare(self, remove_all_json_file):
         if not remove_all_json_file:
-            os.remove(os.path.abspath(os.path.join(self.scheme.get_base_path(), "../../", "all_json_file.json")))
+            all_json_file = os.path.abspath(os.path.join(self.scheme.get_base_path(), "../../", "all_json_file.json"))
+            if os.path.exists(all_json_file):
+                os.remove(all_json_file)
             remove_all_json_file = True
         self.depmgr = DependencyManager(self.scheme.get_rpm_list())
         self.report = Report(self.scheme.get_base_path())

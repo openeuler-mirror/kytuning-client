@@ -49,6 +49,9 @@ def base64_encode(s: str) -> str:
 
 
 class HardwareInfo:
+    """
+    硬件信息
+    """
     def __init__(self) -> None:
         try:
             self.lshw = json.loads(exec_shell_cmd("lshw -json -quiet"))
@@ -341,7 +344,9 @@ class HardwareInfo:
 
 
 class SoftwareInfo:
-
+    """
+    软件信息
+    """
     def _get_curr_utctime(self) -> str:
         result = ExecCmd(command = "date --utc", env = _curenv).run()
         return result.stdout if result.exit_status == 0 else result.stderr
