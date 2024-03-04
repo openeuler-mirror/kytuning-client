@@ -28,16 +28,10 @@ class BaseTest(object):
     def __str__(self):
         return self.project
 
-    def prepare(self, remove_all_json_file):
-        if not remove_all_json_file:
-            all_json_file = os.path.abspath(os.path.join(self.scheme.get_base_path(), "../../", "all_json_file.json"))
-            if os.path.exists(all_json_file):
-                os.remove(all_json_file)
-            remove_all_json_file = True
+    def prepare(self):
         self.depmgr = DependencyManager(self.scheme.get_rpm_list())
         self.report = Report(self.scheme.get_base_path())
         self.report.path_init()
-        return remove_all_json_file
 
     def _collect_env(self):
         try:
