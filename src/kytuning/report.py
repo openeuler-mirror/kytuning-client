@@ -24,8 +24,6 @@ class Report(object):
         self.current_env_file = None
         self.current_report_file = None
         self.exportxlsx = ExportXlsx()
-        self.all_json_file = os.path.abspath(os.path.join(self.basepath, "../../", "all_json_file.json"))
-
     def path_init(self):
         """
         临时文件存放路径初始化
@@ -58,8 +56,6 @@ class Report(object):
         :param env_data      初始环境信息数据
         :return 返回保存的初始化环境信息文件路径
         """
-        # 写环境信息到all_json_data文件中
-        self.save_env_data_to_json(env_data)
         file = open(self.current_env_file, 'w+')
         file.write(env_data)
         file.close()
@@ -156,10 +152,6 @@ class Report(object):
                         file_path,exec_cmd,exec_configs)
             print(ret)
             self.save_result_json(name,ret)
-
-        # 保存all json的结果数据
-        ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
-        self.save_test_data_to_all_json(name, ret)
 
         # 将中间结果文件导入到 excel 表格中
         #tool_name = testinfo["test_type"]
@@ -296,42 +288,7 @@ class Report(object):
         '''
         导出 specjvm 测试结果
         '''
-        return self.export_result()
-
-    def save_env_data_to_json(self, env_data):
-        """
-        :负责人       wqz
-        :message    保存初始环境信息到all_json_file.json
-        :param      env_data:初始环境信息数据
-        :return     all_json_file.json文件路径
-        """
-        # import pdb;
-        # pdb.set_trace()
-        all_json_file = os.path.abspath(os.path.join(self.basepath, "../../", "all_json_file.json"))
-        if not os.path.exists(all_json_file):
-            with open(all_json_file, 'w+', encoding='utf-8') as f:
-                f.write(env_data)
-        return all_json_file
-
-    def save_test_data_to_all_json(self, name, data):
-        """
-        :负责人       wqz
-        :message    保存测试数据到all_json_file.json
-        :param      name: 原始文件名称,区分是什么类型的数据.
-        :param      data: json数据
-        :return:    all_json_file.json文件路径
-        """
-        all_json_file = os.path.abspath(os.path.join(self.basepath, "../../", "all_json_file.json"))
-        time = self.current_result_dir.split('/')[-1]
-        data['time'] = time
-        with open(all_json_file, 'r', encoding='utf-8') as f:
-            content = json.load(f)
-        content[name] = data
-        with open(all_json_file, 'w+', encoding='utf-8') as f_new:
-            json.dump(content, f_new)
-        return all_json_file
-
-
+        return self.export_result() 
 if __name__ == '__main__':
 
     pwd_path = os.getcwd()
