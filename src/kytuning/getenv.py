@@ -196,16 +196,16 @@ class HardwareInfo:
                 # 空间大小
                 "size": blk["size"],
                 # 旋转性
-                "rota": blk["rota"],
+                "rota": str(blk["rota"]),
                 # IO调度器名称
                 "sched": blk["sched"],
                 # 请求队列大小
                 "rq_size": blk["rq-size"],
                 # 设备传输类型
-                "tran": blk["tran"],
+                "tran": str(blk["tran"]),
                 # 获取分区挂载点
                 "mntpoint=/": self.get_fs_type('/'),
-                "mntpoint=/home": self.get_fs_type('/home'),
+                "mntpoint=/home": str(self.get_fs_type('/home')),
             }
             result.append(val)
         return result
