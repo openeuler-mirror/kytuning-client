@@ -45,13 +45,12 @@ class Main(object):
         paths = self.__parse_argv()
         # do test
         cpaths = len(paths)
-        remove_all_json_file = False
         for idx in range(cpaths):
             try:
-                test = TestFactory().get(paths[idx])  # 配置文件和文件夹的准备
-                remove_all_json_file = test.prepare(remove_all_json_file)  # 软件环境验证、初始化保存文件的对象
-                test.do_test()  # 环境、安装软件、设置配置文件、运行测试
-                test.export(self.config.report_path)  # 测试结果保存接口
+                test = TestFactory().get(paths[idx])
+                test.prepare()
+                test.do_test()
+                test.export(self.config.report_path)
             except SchemeError as e:
                 print(e)
             except SchemeParserError as e:
