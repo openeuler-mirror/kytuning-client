@@ -939,8 +939,8 @@ class Lmbench(BenchMark):
                                             "16p/64K"],
             "*Local* Communication latencies": ["2p/0K", "Pipe",
                                                 "AF UNIX", "UDP",
-                                                "RPC/UDP", "TCP",
-                                                "RPC/TCP", "TCP conn"
+                                                "TCP", "TCP conn",
+                                                "RPC/TCP", "RPC/UDP"
                                                 ],
             "File & VM system latencies in microseconds":
             ["0K File create", "0K File delete",

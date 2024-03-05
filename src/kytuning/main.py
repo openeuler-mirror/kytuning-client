@@ -47,10 +47,10 @@ class Main(object):
         cpaths = len(paths)
         for idx in range(cpaths):
             try:
-                test = TestFactory().get(paths[idx])
-                test.prepare()
-                test.do_test()
-                test.export(self.config.report_path)
+                test = TestFactory().get(paths[idx])  # 配置文件和文件夹的准备
+                test.prepare()  # 软件环境验证、初始化保存文件的对象
+                test.do_test()  # 环境、安装软件、设置配置文件、运行测试
+                test.export(self.config.report_path)  # 测试结果保存接口
             except SchemeError as e:
                 print(e)
             except SchemeParserError as e:
