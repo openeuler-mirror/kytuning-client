@@ -49,6 +49,9 @@ def base64_encode(s: str) -> str:
 
 
 class HardwareInfo:
+    """
+    硬件信息
+    """
     def __init__(self) -> None:
         try:
             self.lshw = json.loads(exec_shell_cmd("lshw -json -quiet"))
@@ -196,16 +199,16 @@ class HardwareInfo:
                 # 空间大小
                 "size": blk["size"],
                 # 旋转性
-                "rota": blk["rota"],
+                "rota": str(blk["rota"]),
                 # IO调度器名称
                 "sched": blk["sched"],
                 # 请求队列大小
                 "rq_size": blk["rq-size"],
                 # 设备传输类型
-                "tran": blk["tran"],
+                "tran": str(blk["tran"]),
                 # 获取分区挂载点
                 "mntpoint=/": self.get_fs_type('/'),
-                "mntpoint=/home": self.get_fs_type('/home'),
+                "mntpoint=/home": str(self.get_fs_type('/home')),
             }
             result.append(val)
         return result
@@ -341,7 +344,9 @@ class HardwareInfo:
 
 
 class SoftwareInfo:
-
+    """
+    软件信息
+    """
     def _get_curr_utctime(self) -> str:
         result = ExecCmd(command = "date --utc", env = _curenv).run()
         return result.stdout if result.exit_status == 0 else result.stderr
