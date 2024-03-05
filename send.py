@@ -6,6 +6,14 @@ json_file=sys.argv[1]
 project_name="麒麟自测1"
 user_name = "李四"
 
+if len(sys.argv) < 2:
+    print("请追加all_json_file文件路径")
+    print("例如:")
+    print("python3 send.py /root/kytuning/all_json_file.json")
+    print("")
+    sys.exit(1)
+    
+json_file=sys.argv[1]
 
 # 读取 JSON 文件
 with open(json_file, 'r') as f:
