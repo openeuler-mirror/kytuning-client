@@ -1,8 +1,7 @@
+import sys
 import json
 import requests
-import platform
 
-json_file=sys.argv[1]
 project_name="麒麟自测1"
 user_name = "李四"
 
