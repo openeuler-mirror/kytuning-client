@@ -365,7 +365,7 @@ class SoftwareInfo:
             release_file = '/etc/os-release'
             cmd = "sed -n -e '/^VERSION=/p' %s" % release_file
             res = exec_shell_cmd(cmd)
-            result = res.replace('=', ' ').split()[1]
+            result = res.split('VERSION="')[1][:-1]
         return result
 
     def _get_os_info(self) -> dict:
