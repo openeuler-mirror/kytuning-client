@@ -305,8 +305,8 @@ class Report(object):
         :param      env_data:初始环境信息数据
         :return     all_json_file.json文件路径
         """
-        # import pdb;
-        # pdb.set_trace()
+        time_stamp = time.time()
+        env_data = env_data[:-1]+',"time":'+str(time_stamp) + '}'
         all_json_file = os.path.abspath(os.path.join(self.basepath, "../../", "all_json_file.json"))
         if not os.path.exists(all_json_file):
             with open(all_json_file, 'w+', encoding='utf-8') as f:
