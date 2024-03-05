@@ -1,0 +1,26 @@
+main:
+    # 合并报告的输出路径
+    report_path: "/root/kytuning"
+
+    base_path: "/root/kytuning"
+    run_path: "run"
+    ret_path: "results"
+    src_path: "tools"
+
+stream:
+
+unixbench:
+
+lmbench:
+
+specjvm:
+
+netperf:
+
+fio:
+
+iozone:
+
+speccpu2006:
+
+speccpu2017:
