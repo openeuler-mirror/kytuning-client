@@ -2,10 +2,8 @@ import json
 import requests
 import platform
 
-json_file="/root/kytuning/all_json_file.json"
+json_file=sys.argv[1]
 project_name="麒麟自测1"
-arm=platform.uname().processor
-os_version="0524"
 user_name = "李四"
 
 
@@ -17,8 +15,6 @@ with open(json_file, 'r') as f:
         # 向 Python 对象中添加新的键值对
         data['user_name'] = user_name
         data['project_name'] = project_name
-        data['arm'] = arm
-        data['os_version'] = os_version
         # 将 Python 对象编码为新的 JSON 字符串
         new_json_data = json.dumps(data)
         # 发送 curl 请求
