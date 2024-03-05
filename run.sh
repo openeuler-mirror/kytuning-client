@@ -119,7 +119,7 @@ function download() {
 		fi
 		;;
 	cpu2006)
-		if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/"cpu2006-1.2-pf01.iso" ]]; then
+		if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/cpu2006-1.2-pf01.iso ]]; then
 			handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"
 		elif [[ "${ARCH}" == "loongarch64" &&  ! -f ${tools_path}/cpu2006-1.2-lg64.tar.gz ]];then
 			${WGET_BIN} ${tools_path} ${file_server}cpu2006-1.2-lg64.tar.gz
@@ -159,26 +159,17 @@ install_dependencies() {
     local packages=""
     local packages_manager=""
     local packages_manager_install=""
-	local bc=$1
+	local rk_benchmark=$1
 	declare -A packages_dict ## keys:benchmark values:packages
 	packages_dict[all_dep]="python3"
-	case ${bc} in 
-		unixbench)
-			packages_dict[unixbench]="perl-Time-HiRes"
-			;;
-		lmbench)
-			packages_dict[lmbench]="expect libtirpc-devel"
-			;;
-		cpu2006 | cpu2017)
-			packages_dict[cpu20xx]="gcc-c++ gcc-gfortran"
-			if [ ! -e /lib64/libnsl.so.1 ]; then
-				test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
-			fi
-			;;
-		jvm2008)
-			packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
-			;;
-	esac
+	test "*unixbench*"==${rk_benchmark} && packages_dict[unixbench]="perl-Time-HiRes"
+	test "*lmbench*"==${rk_benchmark} && packages_dict[lmbench]="expect libtirpc-devel"
+	test "*jvm2008*"==${rk_benchmark} && packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
+	if test "*cpu20*"==${rk_benchmark}; then
+		packages_dict[cpu20xx]="gcc-c++ gcc-gfortran"
+		test ! -e /lib64/libnsl.so.1 && test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
+	fi
+
     if [ `command -v yum` ];then
         packages_manager="rpm -q"
         packages_manager_install="yum"
@@ -233,11 +224,10 @@ function run() {
         ln -sf $tools_path $base_dir/tools
 		echo "安装benchmark到${base_dir}/tools"
     fi
-		
+	#安装benchmark依赖
+	install_dependencies ${rk_benchmark}
     # Run kytuning
     for bc in $rk_benchmark; do
-		#安装benchmark依赖
-		install_dependencies ${bc}
         cd $cur_path
 		if [[ ${bc} == "cpu2006" && ${ARCH} == "loongarch64" ]]; then
 			  bc=${bc}-${ARCH}
@@ -258,9 +248,6 @@ function main() {
 
 	if [ $# -eq 0 ]; then
 		run "$rk_benchmark"
-		if [ $? -eq 0 ] && [ $UPLOAD="true" ] ;then
-		    python3 ./send.py
-		fi
 	else
 		parse_cmd $@
 	fi
