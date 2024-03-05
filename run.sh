@@ -26,10 +26,11 @@ function init() {
 	if [ ! -d ${tools_path} ]; then
 		mkdir ${tools_path} 
 	fi
-	if [  -f "$base_dir/all_json_file.json-bak" ];then
+	file1="$base_dir/all_json_file.json"
+	if [  -f $file1 ];then
 		file2="$base_dir/all_json_file-"`date +"%Y%m%d%H%M%S"`".json"
-		mv $base_dir/all_json_file.json-bak $file2
-    fi
+		mv $base_dir/all_json_file.json $file2
+        fi
 	
 	opt_use_net=0
 }
@@ -123,7 +124,7 @@ function download() {
 		fi
 		;;
 	cpu2006)
-		if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/"cpu2006-1.2-pf01.iso" ]]; then
+		if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/cpu2006-1.2-pf01.iso ]]; then
 			handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"
 		elif [[ "${ARCH}" == "loongarch64" &&  ! -f ${tools_path}/cpu2006-1.2-lg64.tar.gz ]];then
 			${WGET_BIN} ${tools_path} ${file_server}cpu2006-1.2-lg64.tar.gz
@@ -163,26 +164,24 @@ install_dependencies() {
     local packages=""
     local packages_manager=""
     local packages_manager_install=""
-	local bc=$1
+	local rk_benchmark=$1
 	declare -A packages_dict ## keys:benchmark values:packages
 	packages_dict[all_dep]="python3"
-	case ${bc} in 
-		unixbench)
-			packages_dict[unixbench]="perl-Time-HiRes"
-			;;
-		lmbench)
-			packages_dict[lmbench]="expect libtirpc-devel"
-			;;
-		cpu2006 | cpu2017)
-			packages_dict[cpu20xx]="gcc-c++ gcc-gfortran"
-			if [ ! -e /lib64/libnsl.so.1 ]; then
-				test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
-			fi
-			;;
-		jvm2008)
-			packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
-			;;
-	esac
+
+	if [[ ${rk_benchmark} == *unixbench* ]]; then
+		packages_dict[unixbench]="perl-Time-HiRes"
+	fi
+	if [[ ${rk_benchmark} == *lmbench* ]]; then
+		packages_dict[lmbench]="expect libtirpc-devel"
+	fi
+	if [[ ${rk_benchmark} == *jvm2008* ]]; then
+		packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
+	fi
+	if [[ ${rk_benchmark} == *cpu20* ]]; then
+		packages_dict[cpu20xx]="gcc-c++ gcc-gfortran"
+		test ! -e /lib64/libnsl.so.1 && test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
+	fi
+
     if [ `command -v yum` ];then
         packages_manager="rpm -q"
         packages_manager_install="yum"
@@ -190,8 +189,12 @@ install_dependencies() {
     elif [ `command -v apt-get` ];then
         packages_manager="dpkg -s"
         packages_manager_install="sudo apt-get"
-		test ! "${packages_dict[cpu20xx]}x" == "x" && packages_dict[cpu20xx]="g++ gfortran"
-		test ! "${packages_dict[jvm2008]}x" == "x" && packages_dict[jvm2008]="openjdk-8-jre-headless"
+		if [[ "${packages_dict[cpu20xx]}x" != "x" ]]; then
+			packages_dict[cpu20xx]="g++ gfortran"
+		fi
+		if [[ "${packages_dict[jvm2008]}x" != "x" ]]; then
+			packages_dict[jvm2008]="openjdk-8-jre-headless"
+		fi
 		test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"	
     fi
 	
@@ -237,11 +240,10 @@ function run() {
         ln -sf $tools_path $base_dir/tools
 		echo "安装benchmark到${base_dir}/tools"
     fi
-		
+	#安装benchmark依赖
+	install_dependencies ${rk_benchmark}
     # Run kytuning
     for bc in $rk_benchmark; do
-		#安装benchmark依赖
-		install_dependencies ${bc}
         cd $cur_path
 		if [[ ${bc} == "cpu2006" && ${ARCH} == "loongarch64" ]]; then
 			  bc=${bc}-${ARCH}
@@ -264,7 +266,7 @@ function main() {
 		run "$rk_benchmark"
 		if [ $? -eq 0 ] && [ $UPLOAD="true" ] ;then
 		    sed -i 's/NR\/RE//g' $base_dir/all_json_file.json
-		    python3 ./send.py
+		    python3 ./send.py $base_dir/all_json_file.json
 		fi
 	else
 		parse_cmd $@
