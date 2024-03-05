@@ -26,8 +26,7 @@ function init() {
 	if [ ! -d ${tools_path} ]; then
 		mkdir ${tools_path} 
 	fi
-	file1="$base_dir/all_json_file.json"
-	if [  -f $file1 ];then
+	if [  -f "$base_dir/all_json_file.json-bak" ];then
 		file2="$base_dir/all_json_file-"`date +"%Y%m%d%H%M%S"`".json"
 		mv $base_dir/all_json_file.json-bak $file2
     fi
@@ -265,7 +264,7 @@ function main() {
 		run "$rk_benchmark"
 		if [ $? -eq 0 ] && [ $UPLOAD="true" ] ;then
 		    sed -i 's/NR\/RE//g' $base_dir/all_json_file.json
-		    python3 ./send.py $base_dir/all_json_file.json
+		    python3 ./send.py
 		fi
 	else
 		parse_cmd $@
