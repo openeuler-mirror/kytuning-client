@@ -44,4 +44,4 @@ with open(json_file, 'r') as f:
         response = requests.post(url, headers=headers, data=new_json_data)
         #print(new_json_data)
         # 输出服务器响应
-        print(response.text)
+        print(json.loads(response.content.decode('utf-8')))
