@@ -263,11 +263,14 @@ function main() {
 
     if [ $# -eq 0 ]; then
         run "$rk_benchmark"
-        sed -i 's/NR\/RE//g' $base_dir/all_json_file.json
-        sed -i 's/": "default"/": ""/g' $base_dir/all_json_file.json
-        sed -i 's/": "not"/": ""/g' $base_dir/all_json_file.json
-        if [ $? -eq 0 ] && [ "$UPLOAD" = "true" ]; then
-            python3 ./send.py $base_dir/all_json_file.json
+        json_file="$base_dir/all_json_file.json"
+        if [ $# -eq 0 ] && [ -f $json_file ]; then
+            sed -i 's/NR\/RE//g' $base_dir/all_json_file.json
+            sed -i 's/": "default"/": ""/g' $base_dir/all_json_file.json
+            sed -i 's/": "not"/": ""/g' $base_dir/all_json_file.json
+            if [ "$UPLOAD" = "true" ]; then
+                python3 ./send.py $base_dir/all_json_file.json
+            fi
         fi
     else
         parse_cmd $@
