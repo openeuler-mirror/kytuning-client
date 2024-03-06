@@ -45,6 +45,11 @@ class DependencyManager(object):
 
 
     def install_once(self, rpm=None):
+        """
+        安装软件
+        :param rpm:
+        :return:
+        """
         if rpm == None:
             return False
 
@@ -54,6 +59,10 @@ class DependencyManager(object):
 
 
     def install(self) -> list:
+        """
+        安装软件的列表
+        :return:
+        """
         for rpm in self.need_install:
            result =  self.install_once(rpm)
            if result == 0:
@@ -70,6 +79,11 @@ class DependencyManager(object):
 
 
     def uninstall_once(self, rpm):
+        """
+        卸载软件
+        :param rpm:
+        :return:
+        """
         if rpm == None:
             return False
 
@@ -79,11 +93,19 @@ class DependencyManager(object):
 
 
     def uninstall_norecord(self):
+        """
+        卸载已经安装完成的软件
+        :return:
+        """
         for rpm in self.succ_install[::-1]:
             result = self.uninstall_once(rpm)
         
 
     def uninstall(self) :
+        """
+        卸载软件列表
+        :return:
+        """
         for rpm in self.succ_install[::-1]:
             result = self.uninstall_once(rpm)
             if result == 0:
@@ -98,6 +120,11 @@ class DependencyManager(object):
 
 
     def check_install(self, rpm):
+        """
+        检测软件是否安装
+        :param rpm:
+        :return:
+        """
         cmd = "rpm -qa  --queryformat '%{name}' " + rpm
         result = ExecCmd(command = cmd, env = self.env).run()
 
