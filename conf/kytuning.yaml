@@ -30,7 +30,15 @@ netperf:
 fio:
 
 iozone:
+    # 测试的内存的大小,不支持的内存大小可以删除或置为空
+    memsize: {half: "64g", full: "128g", double: "256g"}
+    # 测试文件的路径
+    test_file: "/iozone_test.data"
 
 speccpu2006:
+    # 测试时使用的配置文件,优先级config_file_x86(config_file_arm) > config_file
+    config_file: ""
+    config_file_arm: "cpu2006-arm64-fix.cfg"
+    config_file_x86: "cpu2006-x86-fix.cfg"
 
 speccpu2017:
