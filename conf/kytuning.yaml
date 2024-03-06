@@ -7,6 +7,13 @@ main:
     ret_path: "results"
     src_path: "tools"
 
+    # Log
+    log_file: ""
+    log_level: "debug"
+
+    #
+    maxiterations: 1
+
 stream:
 
 unixbench:
@@ -14,6 +21,9 @@ unixbench:
 lmbench:
 
 specjvm:
+    # 系统内存的2/3大小,如果不填写,会自动计算
+    # 不同内核或系统启动时,启动内存的大小会产生变化,以2/3来计算时会略有不同
+    mx_mem: ""
 
 netperf:
 
