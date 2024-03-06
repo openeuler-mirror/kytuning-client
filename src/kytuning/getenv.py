@@ -20,21 +20,21 @@ def exec_shell_cmd(command):
     On success, return the stdout msg with '\\n' and space striped.
     On fails, return null.
     """
-    ret = subprocess.run(command, 
+    ret = subprocess.run(command,
                          shell = True,
-                         stdout = subprocess.PIPE, 
-                         stderr = subprocess.PIPE, 
+                         stdout = subprocess.PIPE,
+                         stderr = subprocess.PIPE,
                          env = _curenv)
     if not ret.returncode:
         return ret.stdout.decode().strip("\n").strip()
     else:
         # commit: 18460c76776d23f5415ef5a98b3838ec15e21914
         if ret.returncode == 1 :
-            return None 
+            return None
 
         logging.error("cmd: [{0}]  msg: {1}".format(
             ret.args, ret.stderr))
-        return None 
+        return None
 
 
 def base64_encode(s: str) -> str:
@@ -140,7 +140,7 @@ class HardwareInfo:
     # 获取已使用的内存
     def _get_mem_used(self) ->str:
         return exec_shell_cmd("free -m | grep Mem: | awk '{print $3}'") + " mebibytes"
-        
+
 
     # 获取空闲的内存
     def _get_mem_free(self) ->str:
@@ -179,7 +179,7 @@ class HardwareInfo:
         res = res.split()
         result = ("%-6s %-6s %-6s %-6s %-6s") % (res[6], res[1], res[2], res[5], res[0])
         return result
-        
+
 
     def get_disk(self) -> dict:
         result = []
@@ -316,7 +316,7 @@ class HardwareInfo:
     def _get_cpu_l1icache(self) -> str:
         result = ExecCmd(command = 'lscpu  | grep "^L1i cache:" | awk -F: \'{print $2}\'', env = _curenv).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
-        
+
     def _get_cpu_l2cache(self) -> str:
         result = ExecCmd(command = 'lscpu  | grep "^L2 cache:" | awk -F: \'{print $2}\'', env = _curenv).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
@@ -452,7 +452,7 @@ class SoftwareInfo:
         cpu_sched = str.split()
         return cpu_sched[5]
 
-    
+
     # 重要软件版本信息
     def _get_sw_ver_info(self) -> dict:
         result = {
@@ -471,8 +471,8 @@ class SoftwareInfo:
     def _get_uptime(self) -> str:
         result = ExecCmd(command = "uptime  | awk  '{print $3 $4 $5}'", env = _curenv).run()
         return result.stdout if result.exit_status == 0 else result.stderr
-        
-        
+
+
     def _get_runtime_env(self) -> dict:
         val = {
             "sysconf":         self._get_conf_all(),
@@ -488,7 +488,7 @@ class SoftwareInfo:
             'uptime':          self._get_uptime()
         }
         return val
-    
+
     def get_software_info(self) -> dict:
         val = {
             'os':              self._get_os_info(),
@@ -554,9 +554,10 @@ class EnvManager(object):
     # 将环境信息导出为字典
     def export_env_dict(self) -> dict:
         return {"envinfo": self.get_env_info()}
-    
+
     # 导出环境信息到Json
     def collect(self):
+        info_json = {}
         try:
             info_json = json.dumps(self.export_env_dict(), indent = 2)
         except:
