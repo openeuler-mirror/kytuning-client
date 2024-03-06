@@ -155,14 +155,15 @@ class Report(object):
             self.save_testcase_data(name,testinfo)
 
             # 保存json的结果数据
-            ret = self.exportxlsx.ret_to_dict(tool_name,
-                        file_path,exec_cmd,exec_configs)
+            ret = self.exportxlsx.ret_to_dict(tool_name,  file_path,exec_cmd,exec_configs)
             print(ret)
             self.save_result_json(name,ret)
 
         # 保存all json的结果数据
         ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
         if self.save_json_data:
+            ret['execute_cmd'] = testinfo['testcase']['run']
+            ret['modify_parameters'] = testinfo['configs']
             self.save_test_data_to_all_json(name, ret)
 
         # 将中间结果文件导入到 excel 表格中
