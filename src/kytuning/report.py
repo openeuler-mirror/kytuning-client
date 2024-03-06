@@ -12,7 +12,7 @@ from .exportexcel import *
 __all__ = ['Report']
 
 class Report(object):
-    
+
     def __init__(self,basepath):
         self.basepath    = basepath
         self.resultspath = self.basepath + "/results"
@@ -25,6 +25,7 @@ class Report(object):
         self.current_report_file = None
         self.exportxlsx = ExportXlsx()
         self.all_json_file = os.path.abspath(os.path.join(self.basepath, "../../", "all_json_file.json"))
+        self.save_json_data = False
 
     def path_init(self):
         """
@@ -47,7 +48,7 @@ class Report(object):
 
     def get_log_save_dir(self):
         """
-        获取日志保存路径   
+        获取日志保存路径
         :return 返回日志保存路径
         """
         return self.current_log_dir
@@ -59,7 +60,9 @@ class Report(object):
         :return 返回保存的初始化环境信息文件路径
         """
         # 写环境信息到all_json_data文件中
-        self.save_env_data_to_json(env_data)
+        if env_data:
+            self.save_json_data = True
+            self.save_env_data_to_json(env_data)
         file = open(self.current_env_file, 'w+')
         file.write(env_data)
         file.close()
@@ -71,8 +74,8 @@ class Report(object):
 
     def save_opmodify_data(self,name,testinfo,data):
         '''
-        环境调优修改信息保存        
-        :param name          测试名称  
+        环境调优修改信息保存
+        :param name          测试名称
         :param testinfo      测试清单信息
         :param data          环境修改信息
         :return              返回环境修改信息文件保存路径
@@ -86,8 +89,8 @@ class Report(object):
 
     def save_testcase_data(self,name,testinfo):
         '''
-        测试清单信息保存      
-        :param name          测试名称  
+        测试清单信息保存
+        :param name          测试名称
         :param testinfo      测试清单信息
         :param data          测试清单内容
         :return              返回测试清单信息文件保存路径
@@ -132,7 +135,7 @@ class Report(object):
     def save_result(self,name,testinfo,data, only_xlsx = False):
         '''
         测试结果保存接口
-        :param name          测试名称  
+        :param name          测试名称
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              测试结果保存路径
@@ -159,7 +162,8 @@ class Report(object):
 
         # 保存all json的结果数据
         ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
-        self.save_test_data_to_all_json(name, ret)
+        if self.save_json_data:
+            self.save_test_data_to_all_json(name, ret)
 
         # 将中间结果文件导入到 excel 表格中
         #tool_name = testinfo["test_type"]
@@ -183,10 +187,10 @@ class Report(object):
         with open(path, 'w+') as fp:
             fp.write(data)
 
-    
+
     def save_unixbench(self,name,testinfo,data):
         '''
-        保存 unixnbench 测试结果        
+        保存 unixnbench 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              unixbench 测试结果保存路径
@@ -194,7 +198,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_fio(self,name,testinfo,data):
         '''
-        保存 fio 测试结果        
+        保存 fio 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              fio 测试结果保存路径
@@ -202,7 +206,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_iozone(self,name,testinfo,data):
         '''
-        保存 iozone 测试结果        
+        保存 iozone 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              iozone 测试结果保存路径
@@ -210,7 +214,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_stream(self,name,testinfo,data):
         '''
-        保存 stream 测试结果        
+        保存 stream 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              stream 测试结果保存路径
@@ -218,7 +222,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_speccpu2006(self,name,testinfo,data):
         '''
-        保存 speccpu2006 测试结果        
+        保存 speccpu2006 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              speccpu2006 测试结果保存路径
@@ -226,7 +230,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_speccpu2017(self,name,testinfo,data):
         '''
-        保存 speccpu2017 测试结果        
+        保存 speccpu2017 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              speccpu2017 测试结果保存路径
@@ -234,7 +238,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_specjvm(self,name,testinfo,data):
         '''
-        保存 specjvm 测试结果        
+        保存 specjvm 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              specjvm 测试结果保存路径
@@ -242,7 +246,7 @@ class Report(object):
         return self.save_result(name,testinfo,data)
     def save_lmbench(self,name,testinfo,data):
         '''
-        保存 lmbench 测试结果        
+        保存 lmbench 测试结果
         :param testinfo      测试清单信息
         :param data          测试结果数据
         :return              lmbench 测试结果保存路径
@@ -251,7 +255,7 @@ class Report(object):
 
     def export_result(self):
         '''
-        导出测试结果        
+        导出测试结果
         '''
         #print("export result data")
         return self.current_report_file
@@ -264,7 +268,7 @@ class Report(object):
 
     def export_lmbench(self):
         '''
-        导出 lmbench 测试结果        
+        导出 lmbench 测试结果
         '''
         return self.export_result()
     def export_fio(self):
@@ -276,22 +280,22 @@ class Report(object):
         '''
         导出 iozone 测试结果
         '''
-        return self.export_result()   
+        return self.export_result()
     def export_stream(self):
         '''
         导出 stream 测试结果
         '''
-        return self.export_result() 
+        return self.export_result()
     def export_speccpu2006(self):
         '''
         导出 speccpu2006 测试结果
         '''
-        return self.export_result() 
+        return self.export_result()
     def export_speccpu2017(self):
         '''
         导出 speccpu2017 测试结果
         '''
-        return self.export_result() 
+        return self.export_result()
     def export_specjvm(self):
         '''
         导出 specjvm 测试结果
@@ -343,7 +347,7 @@ if __name__ == '__main__':
     rep.path_init()
 
     rep.save_env_data(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
-    
+
     # only test
     file = open("./1.out",'r')
     data = file.read()
