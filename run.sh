@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source conf/user.cfg
+source conf/kytuning.cfg
 ARCH=$(arch)
 WGET_BIN="wget -c -P"
 UPLOAD="true"
@@ -100,45 +100,45 @@ function download() {
     case ${benchmark} in
     unixbench)
         if [ ! -f ${tools_path}/UnixBench5.1.3-1.tar.gz ]; then
-            ${WGET_BIN} ${tools_path} ${file_server}UnixBench5.1.3-1.tar.gz
+            ${WGET_BIN} ${tools_path} ${tools_server_url}UnixBench5.1.3-1.tar.gz
         fi
         ;;
     lmbench)
         if [ ! -f ${tools_path}/lmbench-3.0-a9-2.tar.bz2 ]; then
-            handle_single_benchmark ${tools_path} lmbench.tar "${file_server}"    
+            handle_single_benchmark ${tools_path} lmbench.tar "${tools_server_url}"
         fi
         ;;
     stream)
         if [ ! -f ${tools_path}/stream-5.9-1.tar.bz2 ]; then
-            ${WGET_BIN} ${tools_path} ${file_server}stream-5.9-1.tar.bz2
+            ${WGET_BIN} ${tools_path} ${tools_server_url}stream-5.9-1.tar.bz2
         fi
         ;;
     fio)
         if [ ! -f ${tools_path}/fio-3.20.tar.bz2 ]; then
-            ${WGET_BIN} ${tools_path} ${file_server}fio-3.20.tar.bz2
+            ${WGET_BIN} ${tools_path} ${tools_server_url}fio-3.20.tar.bz2
         fi
         ;;
     iozone)
         if [ ! -f ${tools_path}/iozone3_430.tar ]; then
-            ${WGET_BIN} ${tools_path} ${file_server}iozone3_430.tar
+            ${WGET_BIN} ${tools_path} ${tools_server_url}iozone3_430.tar
         fi
         ;;
     cpu2006)
         if [[ ! "${ARCH}" == "loongarch64" && ! -f ${tools_path}/cpu2006-1.2-pf01.iso ]]; then
-            handle_single_benchmark ${tools_path} cpu2006.tar "${file_server}"
+            handle_single_benchmark ${tools_path} cpu2006.tar "${tools_server_url}"
         elif [[ "${ARCH}" == "loongarch64" &&  ! -f ${tools_path}/cpu2006-1.2-lg64.tar.gz ]];then
-            ${WGET_BIN} ${tools_path} ${file_server}cpu2006-1.2-lg64.tar.gz
+            ${WGET_BIN} ${tools_path} ${tools_server_url}cpu2006-1.2-lg64.tar.gz
         fi
         ;;
     cpu2017)
         if [ ! -f ${tools_path}/cpu2017-1_0_5.iso ]; then
-            ${WGET_BIN} ${tools_path} ${file_server}cpu2017.tar
-            handle_single_benchmark ${tools_path} cpu2017.tar "${file_server}"    
+            ${WGET_BIN} ${tools_path} ${tools_server_url}cpu2017.tar
+            handle_single_benchmark ${tools_path} cpu2017.tar "${tools_server_url}"
         fi
         ;;
     jvm2008)
         if [ ! -f ${tools_path}/SPECjvm2008_1_01_setup.jar ]; then
-            handle_single_benchmark ${tools_path} jvm2008.tar "${file_server}"    
+            handle_single_benchmark ${tools_path} jvm2008.tar "${tools_server_url}"
         fi
         ;;
     *)
@@ -149,7 +149,7 @@ function download() {
 }
 
 # 解压指定的本地benchmark工具包，
-# 如果在命令行中使用-f制定了本地文件，或者在user.cfg配置了本地文件，调用该函数处理
+# 如果在命令行中使用-f制定了本地文件，或者在kytuning.cfg配置了本地文件，调用该函数处理
 function handle_tarfile() {
     tar xv --skip-old-files -f $1  
     tar -xvf ${tools_path}/lmbench.tar -C ${tools_path}
@@ -166,7 +166,7 @@ install_dependencies() {
     local packages_manager_install=""
     local rk_benchmark=$@
     declare -A packages_dict ## keys:benchmark values:packages
-    packages_dict[all_dep]="python3"
+    packages_dict[all_dep]="python3 lshw"
 
     if [[ ${rk_benchmark} == *unixbench* ]]; then
         packages_dict[unixbench]="perl-Time-HiRes"
@@ -268,8 +268,8 @@ function main() {
             sed -i 's/NR\/RE//g' $base_dir/all_json_file.json
             sed -i 's/": "default"/": ""/g' $base_dir/all_json_file.json
             sed -i 's/": "not"/": ""/g' $base_dir/all_json_file.json
-            if [ "$UPLOAD" = "true" ]; then
-                python3 ./send.py $base_dir/all_json_file.json
+            if [ "$upload" = true ]; then
+                python3 ./send.py ./conf/kytuning.cfg  $base_dir/all_json_file.json
             fi
         fi
     else
