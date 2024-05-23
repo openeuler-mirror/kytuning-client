@@ -96,7 +96,6 @@ function handle_single_benchmark() {
 # 从网络下载benchmark工具，接受一个参数
 function download() {
     local benchmark=$1
-    local file_server="http://172.29.156.46:8000/tools/"
     case ${benchmark} in
     unixbench)
         if [ ! -f ${tools_path}/UnixBench5.1.3-1.tar.gz ]; then
