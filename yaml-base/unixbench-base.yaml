@@ -1,0 +1,41 @@
+project:    "Unixbench-5.9.1"  # 工程名称
+test_type:  "unixbench" 
+# base_path:  "/root/kytuning/run/unixbench"
+log_file:   "{base_path}/kytuning.log"
+log_level:  "debug"
+
+tool_tgz:   "{base_path}/tools/UnixBench-5.1.3.tar.gz"
+tool_dir:   "{base_path}/UnixBench-5.1.3"
+tool_decompression:     "tar -xvf {tool_tgz} -C {base_path}"
+
+maxiterations:  1
+
+
+# rpm_list:
+#     - "numactl"
+#     - "jemalloc"
+
+# configs:
+#     - name:     "vm.swappiness" 
+#       desc:     "the vm.swapiness" 
+#       get :     "sysctl -a | grep vm.swappiness | awk '{print $3}'"
+#       set :     "sysctl -w vm.swappiness={value}"
+#       value:    20
+
+testcase:
+    - name: "single"
+      clean:  "make clean"
+      build:  "make clean; make"
+      run:
+          command: "./Run -c {FUNC_THREAD_NUM}"
+          c_param: {FUNC_THREAD_NUM: "1"}
+      schemeflag:     0
+
+    - name: "multi"
+      clean:  "make clean"
+      build:  "make clean; make"
+      run:
+          command: "./Run -c {FUNC_THREAD_NUM}"
+          c_param: {FUNC_THREAD_NUM: "multi"}
+      schemeflag:     0
+
