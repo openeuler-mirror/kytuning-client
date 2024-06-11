@@ -1,0 +1,31 @@
+project:    "stream-5.9-1"  # 工程名称
+test_type:  "stream" 
+# base_path:  "/root/kytuning/run/stream"
+log_file:   "{base_path}/kytuning.log"
+log_level:  "debug"
+
+tool_tgz:   "{base_path}/tools/stream-5.9-1.tar.bz2"
+tool_dir:   "{base_path}/stream-5.9-1"
+tool_decompression: "tar -xvf {tool_tgz} -C {base_path}"
+
+maxiterations:  1
+
+
+# rpm_list:
+#     - "numactl"
+#     - "jemalloc"
+
+# configs:
+#     - name:     "vm.swappiness" 
+#       desc:     "the vm.swapiness" 
+#       get :     "sysctl -a | grep vm.swappiness | awk '{print $3}'"
+#       set :     "sysctl -w vm.swappiness={value}"
+#       value:    20
+
+testcase:
+    clean:  "make clean"
+    build:  "make"
+    run:
+        pre_cmd: "{command}"
+        command: "./Run.sh"
+    schemeflag:     0
