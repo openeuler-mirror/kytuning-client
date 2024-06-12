@@ -39,21 +39,21 @@ class BaseTest(object):
             if data:
                 self.report_data["env"] = data
         except:
-            logging.warn('collect env failed.')
+            logging.warning('collect env failed.')
         pass
 
     def _install_dependent_rpms(self):
         try:
             self.depmgr.install()
         except:
-            logging.warn('install dependent rpms failed.')
+            logging.warning('install dependent rpms failed.')
         pass
 
     def _remove_dependent_rpms(self):
         try:
             self.depmgr.uninstall()
         except:
-            logging.warn('uninstall dependent rpms failed.')
+            logging.warning('uninstall dependent rpms failed.')
         pass
 
     def _setup_config(self):
@@ -61,7 +61,7 @@ class BaseTest(object):
             for item in self.scheme.get_configs():
                 item.setup()
         except:
-            logging.warn('setup config failed.')
+            logging.warning('setup config failed.')
         pass
 
     def _reset_config(self):
@@ -69,7 +69,7 @@ class BaseTest(object):
             for item in self.scheme.get_configs():
                 item.reset()
         except:
-            logging.warn('reset config failed.')
+            logging.warning('reset config failed.')
         pass
 
     def _do_testcase(self, tcase):
@@ -189,7 +189,7 @@ class UnixbenchTest(BaseTest):
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
         if save:
-            with open(save[0]) as fp:
+            with open(save[0],'r') as fp:
                 data = fp.read()
         return data
 
@@ -269,7 +269,7 @@ class FioTest(BaseTest):
         #     with open(save) as fp:
         #         data = fp.read()
         if save:
-            with open(save[0]) as fp:
+            with open(save[0],'r') as fp:
                 data = fp.read()
         return data
 
@@ -300,7 +300,7 @@ class IoZoneTest(BaseTest):
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
         if save:
-            with open(save[0]) as fp:
+            with open(save[0],'r') as fp:
                 data = fp.read()
         return data
 
