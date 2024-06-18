@@ -48,12 +48,13 @@ class ExecCmd(object):
         print(result.stderr)
     """
 
-    def __init__(self, command, timeout=None,  env=None, muted=False):
+    def __init__(self, command, timeout=None,  env=None, muted=False，shell = False):
         self.command = command
         self.result = CommandResult(command)
         self.env = env
         self.timeout = timeout
         self.muted = muted
+        self.shell = shell
 
         if self.timeout:
             self.stoptime = time.time() + timeout
@@ -64,10 +65,10 @@ class ExecCmd(object):
             self.sp = None
         else:
             self.sp = subprocess.Popen(
-                command,
+                self.command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                shell=True,
+                shell=self.shell,
                 preexec_fn=os.setpgid(0, 0),
                 env=self.env)
 
@@ -153,6 +154,6 @@ class ExecCmd(object):
 
 
 if __name__ == '__main__':
-    e = ExecCmd(command='ls /itmp', env = dict(os.environ, LC_ALL="C"))
+    e = ExecCmd(command='ls /itmp', env = dict(os.environ, LC_ALL="C"),shell = True)
     result = e.run();
     print(result)
