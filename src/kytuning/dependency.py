@@ -66,9 +66,9 @@ class DependencyManager(object):
         for rpm in self.need_install:
            result =  self.install_once(rpm)
            if result == 0:
-               self.succ_install.append(str(rpm))
+               self.succ_install.append(rpm)
            else:
-               self.fail_install.append(str(rpm))
+               self.fail_install.append(rpm)
 
         if len(self.fail_install) > 0:
             # environment recovery
@@ -109,9 +109,9 @@ class DependencyManager(object):
         for rpm in self.succ_install[::-1]:
             result = self.uninstall_once(rpm)
             if result == 0:
-                self.succ_uninstall.append(str(rpm))
+                self.succ_uninstall.append(rpm)
             else:
-                self.fail_uninstall.append(str(rpm))
+                self.fail_uninstall.append(rpm)
                 
         if len(self.fail_uninstall) > 0:
             raise DependencyError("Dependency uninstall failed:" + str(self.fail_uninstall))
