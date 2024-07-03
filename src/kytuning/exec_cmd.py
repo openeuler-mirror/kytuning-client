@@ -8,6 +8,7 @@ import subprocess
 import signal
 import select
 import traceback
+import shlex
 from .logger import *
 
 
@@ -48,8 +49,8 @@ class ExecCmd(object):
         print(result.stderr)
     """
 
-    def __init__(self, command, timeout=None,  env=None, muted=False，shell = False):
-        self.command = command
+    def __init__(self, command, timeout=None,  env=None, muted=False, shell = False):
+        self.command = command if shell else shlex.split(command)
         self.result = CommandResult(command)
         self.env = env
         self.timeout = timeout
@@ -154,6 +155,6 @@ class ExecCmd(object):
 
 
 if __name__ == '__main__':
-    e = ExecCmd(command='ls /itmp', env = dict(os.environ, LC_ALL="C"),shell = True)
+    e = ExecCmd(command='ls /itmp', env = dict(os.environ, LC_ALL="C"))
     result = e.run();
     print(result)
