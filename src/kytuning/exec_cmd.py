@@ -47,6 +47,8 @@ class ExecCmd(object):
         result = task.run()
         print(result.stdout)
         print(result.stderr)
+    Notice: if command contains ";" or "|", which means multiple command
+    in oneline, please add shell=True explicitly.
     """
 
     def __init__(self, command, timeout=None,  env=None, muted=False, shell = False):
@@ -56,6 +58,11 @@ class ExecCmd(object):
         self.timeout = timeout
         self.muted = muted
         self.shell = shell
+
+        if not shell and ('|' in command or ';' in command):
+            logging.error("Please add shell=True explicitly")
+            self.sp = None
+            return
 
         if self.timeout:
             self.stoptime = time.time() + timeout

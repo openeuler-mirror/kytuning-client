@@ -263,11 +263,11 @@ class HardwareInfo:
 
 
     def _get_cpu_vendor(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^Vendor ID" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^Vendor ID" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_family(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^CPU family" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^CPU family" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     #获取cpu型号
@@ -281,52 +281,52 @@ class HardwareInfo:
 
     #获取物理cpu个数
     def _get_cpu_phycount(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^CPU(s)" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^CPU(s)" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     #获取逻辑cpu个数
     def _get_cpu_cores_per(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "Thread(s) per core" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "Thread(s) per core" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_op_mode(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "CPU op-mode" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "CPU op-mode" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_byte_order(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "Byte Order" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "Byte Order" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_online_cpulist(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "On-line CPU(s) list" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "On-line CPU(s) list" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_virtual(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^Virtualization:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^Virtualization:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_virtual_type(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^Virtualization type:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^Virtualization type:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_l1dcache(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^L1d cache:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^L1d cache:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_l1icache(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^L1i cache:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^L1i cache:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_l2cache(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^L2 cache:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^L2 cache:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_l3cache(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^L3 cache:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^L3 cache:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def _get_cpu_flags(self) -> str:
-        result = ExecCmd(command = 'lscpu  | grep "^Flags:" | awk -F: \'{print $2}\'', env = _curenv).run()
+        result = ExecCmd(command = 'lscpu  | grep "^Flags:" | awk -F: \'{print $2}\'', env = _curenv, shell=True).run()
         return result.stdout.lstrip() if result.exit_status == 0 else "nil"
 
     def get_hardware_info(self) -> dict:
@@ -405,7 +405,7 @@ class SoftwareInfo:
         return base64_encode(res)
 
     def _get_gcc_ver(self) -> str:
-        result = ExecCmd(command = "gcc --version | sed -n '1p' ", env = _curenv).run()
+        result = ExecCmd(command = "gcc --version | sed -n '1p' ", env = _curenv, shell=True).run()
         return result.stdout if result.exit_status == 0 else result.stderr
 
     def _get_glibc_ver(self) -> str:
@@ -418,16 +418,16 @@ class SoftwareInfo:
             return glibc_version[5]
 
     def _get_java_ver(self) -> str:
-        result = ExecCmd(command = 'java -version', env = _curenv).run()
+        result = ExecCmd(command = 'java -version', env = _curenv, shell=True).run()
         return result.stdout if result.exit_status == 0 else "nil"
 
 
     def _get_goo_ver(self) -> str:
-        result = ExecCmd(command = 'g++ --version | sed -n "1p" ', env = _curenv).run()
+        result = ExecCmd(command = 'g++ --version | sed -n "1p" ', env = _curenv, shell=True).run()
         return result.stdout if result.exit_status == 0 else result.stderr
 
     def _get_gfortran_ver(self) -> str:
-        result = ExecCmd(command = 'gfortran --version | sed -n "1p"', env = _curenv).run()
+        result = ExecCmd(command = 'gfortran --version | sed -n "1p"', env = _curenv, shell=True).run()
         return result.stdout if result.exit_status == 0 else "nil"
 
 
@@ -469,7 +469,7 @@ class SoftwareInfo:
         return result.stdout if result.exit_status == 0 else result.stderr
 
     def _get_uptime(self) -> str:
-        result = ExecCmd(command = "uptime  | awk  '{print $3 $4 $5}'", env = _curenv).run()
+        result = ExecCmd(command = "uptime  | awk  '{print $3 $4 $5}'", env = _curenv, shell=True).run()
         return result.stdout if result.exit_status == 0 else result.stderr
 
 
