@@ -4,9 +4,9 @@ test_type:  "stream"
 log_file:   "{base_path}/kytuning.log"
 log_level:  "debug"
 
-tool_tgz:   "{base_path}/tools/stream-5.9-1.tar.bz2"
-tool_dir:   "{base_path}/stream-5.9-1"
-tool_decompression: "tar -xvf {tool_tgz} -C {base_path}"
+tool_tgz:   "{base_path}/tools/stream-master.zip"
+tool_dir:   "{base_path}/stream-master"
+tool_decompression: "unzip {tool_tgz} -d {base_path} > /dev/null && mv -fT {base_path}/STREAM-master {tool_dir}"
 
 maxiterations:  1
 
@@ -24,8 +24,8 @@ maxiterations:  1
 
 testcase:
     clean:  "make clean"
-    build:  "make"
+    build:  "make stream_c.exe"
     run:
         pre_cmd: "{command}"
-        command: "./Run.sh"
+        command: "OMP_NUM_THREADS=1 ./stream_c.exe && OMP_NUM_THREADS=`grep process /proc/cpuinfo | wc -l` ./stream_c.exe"
     schemeflag:     0
