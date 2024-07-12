@@ -108,8 +108,8 @@ function download() {
         fi
         ;;
     stream)
-        if [ ! -f ${tools_path}/stream-5.9-1.tar.bz2 ]; then
-            ${WGET_BIN} ${tools_path} ${tools_server_url}stream-5.9-1.tar.bz2
+        if [ ! -f ${tools_path}/stream-master.zip ]; then
+            ${WGET_BIN} ${tools_path} -O ${tools_path}/stream-master.zip ${tools_stream_url}
         fi
         ;;
     fio)
