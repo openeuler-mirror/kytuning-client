@@ -216,7 +216,7 @@ class StreamTest(BaseTest):
         for item in os.listdir(tdir):
             path = '{tdir}/{item}'.format(tdir=tdir, item=item)
             stat = os.stat('{tdir}/{item}'.format(tdir=tdir, item=item))
-            if item.startswith('Single'):
+            if item.startswith('Single') or item.startswith('1-'):
                 s_save = self.compare_and_return_newer(s_save, (path, stat))
             else:
                 m_save = self.compare_and_return_newer(s_save, (path, stat))
