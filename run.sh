@@ -108,13 +108,13 @@ function download() {
         fi
         ;;
     stream)
-        if [ ! -f ${tools_path}/stream-master.zip ]; then
-            ${WGET_BIN} ${tools_path} -O ${tools_path}/stream-master.zip ${tools_stream_url}
+        if [ ! -f ${tools_path}/stream-5.10.tar.gz ]; then
+            ${WGET_BIN} ${tools_path} -O ${tools_path}/stream-5.10.tar.gz ${tools_stream_url}
         fi
         ;;
     fio)
-        if [ ! -f ${tools_path}/fio-3.20.tar.bz2 ]; then
-            ${WGET_BIN} ${tools_path} ${tools_server_url}fio-3.20.tar.bz2
+        if [ ! -f ${tools_path}/fio-3.34.tar.bz2 ]; then
+            ${WGET_BIN} ${tools_path} ${tools_fio_url}
         fi
         ;;
     iozone)
