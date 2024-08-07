@@ -1,0 +1,33 @@
+project:    "fio-3.34"  # 工程名称
+test_type:  "fio" 
+# base_path:  "/root/kytuning/run/stream"
+log_file:   "{base_path}/kytuning.log"
+log_level:  "debug"
+# openeuler 版本
+tool_tgz:   "{base_path}/tools/fio-3.34.tar.bz2"
+tool_dir:   "{base_path}/fio-3.34"
+tool_decompression: "tar -xvf {tool_tgz} -C {base_path} > /dev/null "
+
+maxiterations:  1
+
+
+# rpm_list:
+#     - "numactl"
+#     - "jemalloc"
+
+# configs:
+#     - name:     "vm.swappiness" 
+#       desc:     "the vm.swapiness" 
+#       get :     "sysctl -a | grep vm.swappiness | awk '{print $3}'"
+#       set :     "sysctl -w vm.swappiness={value}"
+#       value:    20
+
+testcase:
+    clean:  "make clean"
+    build:  "make "
+    run:
+        pre_cmd: "test -d results || mkdir results; {command}"
+        command: "./fio -filename=./fio_test  -direct=1  -iodepth 32 -thread -rw={readwrite} -ioengine=psync -bs={blocksize} -size=1024M -runtime=60 -numjobs=4 -group_reporting -name={blocksize}_{readwrite}.result > ./results/{blocksize}_{readwrite}.result"
+        c_param: {blocksize: "4K", readwrite: "write"}
+
+    schemeflag:     0
