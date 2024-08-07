@@ -3,10 +3,14 @@ test_type:  "stream"
 # base_path:  "/root/kytuning/run/stream"
 log_file:   "{base_path}/kytuning.log"
 log_level:  "debug"
-
-tool_tgz:   "{base_path}/tools/stream-master.zip"
-tool_dir:   "{base_path}/stream-master"
-tool_decompression: "unzip {tool_tgz} -d {base_path} > /dev/null && mv -fT {base_path}/STREAM-master {tool_dir}"
+# github版本
+#tool_tgz:   "{base_path}/tools/stream-master.zip"
+#tool_dir:   "{base_path}/stream-master"
+#tool_decompression: "unzip {tool_tgz} -d {base_path} > /dev/null && mv -fT {base_path}/STREAM-master {tool_dir}"
+# openeuler 5.10版本
+tool_tgz:   "{base_path}/tools/stream-5.10.tar.gz"
+tool_dir:   "{base_path}/stream-5.10"
+tool_decompression: "tar -xvf {tool_tgz} -C {base_path} > /dev/null "
 
 maxiterations:  1
 
