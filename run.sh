@@ -103,8 +103,8 @@ function download() {
         fi
         ;;
     lmbench)
-        if [ ! -f ${tools_path}/lmbench-3.0-a9-2.tar.bz2 ]; then
-            handle_single_benchmark ${tools_path} lmbench.tar "${tools_server_url}"
+        if [ ! -f ${tools_path}/lmbench3.tar.gz ]; then
+            ${WGET_BIN} ${tools_path} ${tools_lmbench_url}
         fi
         ;;
     stream)
