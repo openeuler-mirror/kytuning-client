@@ -1,0 +1,32 @@
+project:    "lmbench3"  # 工程名称
+test_type:  "lmbench" 
+# base_path:  "/root/kytuning/run/stream"
+log_file:   "{base_path}/kytuning.log"
+log_level:  "debug"
+# openeuler 版本
+tool_tgz:   "{base_path}/tools/lmbench3.tar.gz"
+tool_dir:   "{base_path}/lmbench3"
+tool_decompression: "tar -xvf {tool_tgz} -C {base_path} > /dev/null "
+
+maxiterations:  1
+
+
+# rpm_list:
+#     - "numactl"
+#     - "jemalloc"
+
+# configs:
+#     - name:     "vm.swappiness" 
+#       desc:     "the vm.swapiness" 
+#       get :     "sysctl -a | grep vm.swappiness | awk '{print $3}'"
+#       set :     "sysctl -w vm.swappiness={value}"
+#       value:    20
+
+testcase:
+    clean:  "make clean"
+    build:  "make "
+    run:
+        pre_cmd: "make clean"
+        command: "make results;make see"
+
+    schemeflag:     0
