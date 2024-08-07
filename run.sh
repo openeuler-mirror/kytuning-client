@@ -98,8 +98,8 @@ function download() {
     local benchmark=$1
     case ${benchmark} in
     unixbench)
-        if [ ! -f ${tools_path}/UnixBench5.1.3-1.tar.gz ]; then
-            ${WGET_BIN} ${tools_path} ${tools_server_url}UnixBench5.1.3-1.tar.gz
+        if [ ! -f ${tools_path}/unixbench-5.1.3.tar.gz ]; then
+            ${WGET_BIN} ${tools_path} ${tools_unixbench_url}
         fi
         ;;
     lmbench)
