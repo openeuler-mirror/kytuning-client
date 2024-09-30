@@ -264,8 +264,8 @@ class BenchMark(object):
                 self.color_title, self.font_title)  # 填充第一列中的内容  'hwinfo'
             _row_A = _row
             # print(type(env_dict["envinfo"][A_names[A_i]]))
-            if type(_env_dict["envinfo"][A_names[A_i]]) != str:
-                key_names = list(_env_dict["envinfo"][A_names[A_i]].keys())
+            if type(_env_dict[A_names[A_i]]) != str:
+                key_names = list(_env_dict[A_names[A_i]].keys())
                 keys_len = len(key_names)
                 for i in range(keys_len):   # 遍历第二列中的内容
                     # print(key_names[i])
@@ -274,9 +274,9 @@ class BenchMark(object):
                         2, key_names[i], self.alignment_center,
                         self.color_item_1, self.font_item_1)   # 填充第二列中的内容
                     value_type = type(
-                        _env_dict["envinfo"][A_names[A_i]][key_names[i]])
+                        _env_dict[A_names[A_i]][key_names[i]])
                     if value_type == str:
-                        cell_str = _env_dict["envinfo"][A_names[A_i]
+                        cell_str = _env_dict[A_names[A_i]
                                                         ][key_names[i]]
                         self.set_cell_style(
                             sheet, _row+row_start_idx, 4,
@@ -286,7 +286,7 @@ class BenchMark(object):
                         _row = _row + 1
                     elif value_type == dict:
                         dict_keys_name = list(
-                            _env_dict["envinfo"][A_names[A_i]
+                            _env_dict[A_names[A_i]
                                                  ][key_names[i]].keys())
                         dict_keys_len = len(dict_keys_name)
                         _row_up = _row
@@ -296,13 +296,11 @@ class BenchMark(object):
                                 dict_keys_name[j], self.alignment_center,
                                 self.color_item_2, self.font_item_2)  # 填充第三列
                             dict_keys_type = type(
-                                _env_dict["envinfo"][A_names[A_i]
+                                _env_dict[A_names[A_i]
                                                      ][key_names[i]
                                                        ][dict_keys_name[j]])
                             if dict_keys_type == str:
-                                cell_str = _env_dict["envinfo"
-                                                     ][A_names[A_i]
-                                                       ][key_names[i]
+                                cell_str = _env_dict[A_names[A_i]][key_names[i]
                                                          ][dict_keys_name[j]]
                                 if any(dict_keys_name[j]
                                        in s for s in base64_list):
@@ -340,7 +338,7 @@ class BenchMark(object):
                             _row_up+row_start_idx, _row-1+row_start_idx)
                     elif value_type == list:
                         _row_up = _row
-                        for list_l in _env_dict["envinfo"][A_names[A_i]
+                        for list_l in _env_dict[A_names[A_i]
                                                            ][key_names[i]]:
                             if type(list_l) == str:  # memType
                                 # print(list_l)
@@ -376,7 +374,7 @@ class BenchMark(object):
             else:
                 self.set_cell_style(
                     sheet, _row +
-                    row_start_idx, 4, _env_dict["envinfo"][A_names[A_i]],
+                    row_start_idx, 4, _env_dict[A_names[A_i]],
                     self.alignment_left,
                     self.color_data, self.font_data)
 
