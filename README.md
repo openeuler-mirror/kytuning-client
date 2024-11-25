@@ -23,11 +23,12 @@ kytuning-client is software that runs as a target tester, and its internal proce
 
 #### Installation
 
-1.   yum install -y httpd
+1.   To install dependencies: pip install -r  requirements.txt
 
 #### Instructions
 
-1.   Build an HTTP server to store testing software
+1.  Deploy the server, and upload the test results to the server after the test is completed.
+2.  You can run kytuning-client separately without deploying the server.
 2.  Download kyting client
 3.  Run sh run.sh
 
