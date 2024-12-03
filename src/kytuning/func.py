@@ -1,3 +1,10 @@
+"""
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * See LICENSE file for more details.
+ * Author: liyl_kl <liyulong@kylinos.cn>
+ * Date: Fri Feb 23 15:51:57 2024 +0800
+"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 

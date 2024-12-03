@@ -1,3 +1,10 @@
+"""
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * See LICENSE file for more details.
+ * Author: wangqingzheng <wangqingzheng@kylinos.cn>
+ * Date: Thu Dec 14 10:56:24 2023 +0800
+"""
 #!/usr/bin/python3
 # 功能：从环境/测试结果json文件导出到excel
 # 依赖库：openpyxl
