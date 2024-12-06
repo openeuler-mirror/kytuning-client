@@ -22,7 +22,7 @@ class Main(object):
 
     def __parse_argv(self):
         if len(sys.argv) < 2: 
-            print('input scheme path.') 
+            logging.error('input scheme path.') 
             sys.exit()
 
         opts, args = getopt.getopt(sys.argv[1:], "hf:", ["help", "report_path="])
@@ -34,15 +34,15 @@ class Main(object):
             pass
 
         if len(args) == 0:
-            print('input scheme path.')
+            logging.error('input scheme path.')
             sys.exit()
 
         for file in args:
             if file is None or len(file) == 0:
-                print('invalid scheme path : "%s"' % file)
+                logging.error('invalid scheme path : "%s"' % file)
                 sys.exit()
             if not os.path.exists(file):
-                print("scheme not found: \"%s\"" % file)
+                logging.error("scheme not found: \"%s\"" % file)
                 sys.exit()
 
         return args
@@ -59,9 +59,9 @@ class Main(object):
                 test.do_test()  # 环境、安装软件、设置配置文件、运行测试
                 test.export(self.config.report_path)  # 测试结果保存接口
             except SchemeError as e:
-                print(e)
+                logging.error(e)
             except SchemeParserError as e:
-                print(e)
+                logging.error(e)
             except TestNotFound as e:
                 logging.error(e)
             except TestCaseError as e:
