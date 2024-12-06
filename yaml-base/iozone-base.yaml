@@ -1,0 +1,21 @@
+project:    "iozone"  # 工程名称
+test_type:  "iozone" 
+log_file:   "{base_path}/kytuning.log"
+log_leve:  "debug"
+
+tool_tgz:   "{base_path}/tools/iozone3_490.tar"
+tool_dir:   "{base_path}/iozone3_490"
+tool_decompression: "tar -xvf {tool_tgz} -C {base_path}"
+
+maxiterations:  1
+
+
+testcase:
+    - name: "half"
+      clean:  ""
+      build:  "make -C src/current linux"
+      run:
+          pre_cmd: "mkdir result; {command}"
+          command: "./src/current/iozone -i 0 -i 1 -i 2 -s {FUNC_IOZONE_MEMSIZE} -r 16m -f {FUNC_IOZONE_FILE} -Rb ./result/iozone_{FUNC_IOZONE_MEMSIZE}.xls | tee ./result/iozone_{FUNC_IOZONE_MEMSIZE}_console.log"
+          c_param: {FUNC_IOZONE_MEMSIZE: "half", FUNC_IOZONE_FILE: ""}
+      schemeflag:     0
