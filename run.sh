@@ -118,8 +118,8 @@ function download() {
         fi
         ;;
     iozone)
-        if [ ! -f ${tools_path}/iozone3_430.tar ]; then
-            ${WGET_BIN} ${tools_path} ${tools_server_url}iozone3_430.tar
+        if [ ! -f ${tools_path}/iozone3_490.tar ]; then
+            ${WGET_BIN} ${tools_path} ${tools_iozone_url}iozone3_490.tar
         fi
         ;;
     cpu2006)
