@@ -140,6 +140,11 @@ function download() {
             handle_single_benchmark ${tools_path} jvm2008.tar "${tools_server_url}"
         fi
         ;;
+    netperf)
+        if [ ! -f ${tools_path}/SPECjvm2008_1_01_setup.jar ]; then
+            ${WGET_BIN} ${tools_path} ${tools_netperf_url}
+        fi
+        ;;
     *)
         echo "无法下载${benchmark}, 目前尚未支持该工具"
         exit 1
