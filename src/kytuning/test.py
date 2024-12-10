@@ -153,7 +153,7 @@ class BaseTest(object):
             if ret_path is not None and len(ret_path) > 0:
                 subproc_call("  rm -f {ret_path}/kytuning-result.xlsx;                       \
                                 ret_file=\"$(find ../results/ -name '*.xlsx' | tail -n 1)\"; \
-                                cp \"$ret_file\" {ret_path}/".format(ret_path = ret_path))
+                                ".format(ret_path = ret_path))
             break
         pass
 

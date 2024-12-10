@@ -1,0 +1,20 @@
+project:    "netperf"  # 工程名称
+test_type:  "netperf" 
+log_file:   "{base_path}/kytuning.log"
+log_leve:  "debug"
+
+tool_tgz:   "{base_path}/tools/netperf-2.7.0.tar.gz"
+tool_dir:   "{base_path}/netperf"
+tool_decompression: "tar -xvf {tool_tgz} -C {base_path}"
+
+maxiterations:  1
+
+
+testcase:
+    - name: "netperf"
+      clean:  ""
+      build:  "make -C src/current linux"
+      run:
+          pre_cmd: "mkdir result; {command}"
+          command: "echo test netperf"
+      schemeflag:     0
