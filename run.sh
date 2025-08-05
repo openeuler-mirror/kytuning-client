@@ -141,7 +141,7 @@ function download() {
         fi
         ;;
     netperf)
-        if [ ! -f ${tools_path}/SPECjvm2008_1_01_setup.jar ]; then
+        if [ ! -f ${tools_path}/netperf-2.7.0.tar.gz ]; then
             ${WGET_BIN} ${tools_path} ${tools_netperf_url}
         fi
         ;;
