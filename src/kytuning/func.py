@@ -34,7 +34,7 @@ class FUNC(object):
         if type == 'single':
             return '1'
         elif type == 'multi':
-            result = ExecCmd(command = 'cat /proc/cpuinfo| grep "processor"| wc -l', env = self.curenv, shell=True).run()
+            result = ExecCmd(command = 'cat /proc/cpuinfo| grep "processor"| wc -l', env = self.curenv).run()
             if result.exit_status == 0:
                 return result.stdout.strip()
         return None
