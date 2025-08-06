@@ -1,4 +1,4 @@
-project:    "stream-5.9-1"  # 工程名称
+project:    "stream-5.10"  # 工程名称
 test_type:  "stream" 
 # base_path:  "/root/kytuning/run/stream"
 log_file:   "{base_path}/kytuning.log"
