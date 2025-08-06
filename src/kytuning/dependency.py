@@ -46,9 +46,9 @@ class DependencyManager(object):
         for rpm in rpmlist:
             installed = self.check_install(rpm)
             if installed == True:
-                self.dont_install.append(rpm)
+                self.dont_install.append(str(rpm))
             else:
-                self.need_install.append(rpm)
+                self.need_install.append(str(rpm))
 
 
     def install_once(self, rpm=None):
@@ -73,9 +73,9 @@ class DependencyManager(object):
         for rpm in self.need_install:
            result =  self.install_once(rpm)
            if result == 0:
-               self.succ_install.append(rpm)
+               self.succ_install.append(str(rpm))
            else:
-               self.fail_install.append(rpm)
+               self.fail_install.append(str(rpm))
 
         if len(self.fail_install) > 0:
             # environment recovery
