@@ -15,7 +15,6 @@ import subprocess
 import signal
 import select
 import traceback
-import shlex
 from .logger import *
 
 
@@ -54,22 +53,14 @@ class ExecCmd(object):
         result = task.run()
         print(result.stdout)
         print(result.stderr)
-    Notice: if command contains ";" or "|", which means multiple command
-    in oneline, please add shell=True explicitly.
     """
 
-    def __init__(self, command, timeout=None,  env=None, muted=False, shell = False):
-        self.command = command if shell else shlex.split(command)
+    def __init__(self, command, timeout=None,  env=None, muted=False):
+        self.command = command
         self.result = CommandResult(command)
         self.env = env
         self.timeout = timeout
         self.muted = muted
-        self.shell = shell
-
-        if not shell and ('|' in command or ';' in command):
-            logging.error("Please add shell=True explicitly")
-            self.sp = None
-            return
 
         if self.timeout:
             self.stoptime = time.time() + timeout
@@ -80,10 +71,10 @@ class ExecCmd(object):
             self.sp = None
         else:
             self.sp = subprocess.Popen(
-                self.command,
+                command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                shell=self.shell,
+                shell=True,
                 preexec_fn=os.setpgid(0, 0),
                 env=self.env)
 
