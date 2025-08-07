@@ -41,7 +41,7 @@ class DependencyManager(object):
         self.fail_uninstall = []
 
         if rpmlist == None:
-            raise Exception("The len of rpmlist is 0")
+            return
 
         for rpm in rpmlist:
             installed = self.check_install(rpm)
@@ -116,9 +116,9 @@ class DependencyManager(object):
         for rpm in self.succ_install[::-1]:
             result = self.uninstall_once(rpm)
             if result == 0:
-                self.succ_uninstall.append(rpm)
+                self.succ_uninstall.append(str(rpm))
             else:
-                self.fail_uninstall.append(rpm)
+                self.fail_uninstall.append(str(rpm))
                 
         if len(self.fail_uninstall) > 0:
             raise DependencyError("Dependency uninstall failed:" + str(self.fail_uninstall))
