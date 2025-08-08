@@ -5,7 +5,9 @@
  * Author: wangqingzheng <wangqingzheng@kylinos.cn>
  * Date: Thu Dec 14 10:56:24 2023 +0800
 """
-#!/usr/bin/python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # 功能：从环境/测试结果json文件导出到excel
 # 依赖库：openpyxl
 
