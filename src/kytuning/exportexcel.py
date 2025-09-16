@@ -243,7 +243,7 @@ class BenchMark(object):
         if not env_dict:
             return
         text_sheet_title = "性能测试环境统计表"
-        _env_dict = env_dict
+        _env_dict = env_dict["envinfo"]
         index_start = 1
         self.set_cell_style(sheet, index_start, index_start,
                             text_sheet_title, self.alignment_center,
@@ -262,7 +262,7 @@ class BenchMark(object):
         row_start_idx = 5
         _row_up = 0
         _row = 1
-        A_names = list(_env_dict["envinfo"].keys())
+        A_names = list(_env_dict.keys())
         A_names_len = len(A_names)
         for A_i in range(A_names_len):     # 遍历第一列中的内容
             self.set_cell_style(
