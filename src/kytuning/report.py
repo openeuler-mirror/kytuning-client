@@ -5,7 +5,7 @@
  * Author: liyl <liyulong@kylinos.cn>
  * Date: Thu Dec 14 10:04:55 2023 +0800
 """
-# 
+#
 # report模块设计和实现分为三个阶段
 # 1. 实现中间结果保存
 # 2. 实现excel文件导出
@@ -74,9 +74,6 @@ class Report(object):
         file.write(env_data)
         file.close()
 
-        # 保存环境信息到 xlsx 表格中
-        self.exportxlsx.export_env_to_xlsx(json.loads(env_data),self.current_report_file)
-
         return self.current_env_file
 
     def save_opmodify_data(self,name,testinfo,data):
@@ -139,7 +136,7 @@ class Report(object):
             dumps_str = dumps_str + t_config["setup"] +'\r\n'
         return dumps_str
 
-    def save_result(self,name,testinfo,data, only_xlsx = False):
+    def save_result(self,name,testinfo,data):
         '''
         测试结果保存接口
         :param name          测试名称
@@ -154,37 +151,32 @@ class Report(object):
         tool_name = testinfo["test_type"]
         exec_cmd = testinfo["testcase"]["run"]
         exec_configs= self.dumps_configs(testinfo)
-        if only_xlsx == False:
-            # 保存中间结果文件
-            self.save_result_data(name, data)
+        # 保存中间结果文件
+        self.save_result_data(name, data)
 
-            # 保存测试清单信息
-            self.save_testcase_data(name,testinfo)
-            # 保存json的结果数据
-            ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
-            #print(ret)
-            self.save_result_json(name,ret)
+        # 保存测试清单信息
+        self.save_testcase_data(name,testinfo)
+
+        # 保存json的结果数据
+        ret = self.exportxlsx.ret_to_dict(tool_name,  file_path,exec_cmd,exec_configs)
+        print(ret)
+        self.save_result_json(name,ret)
 
         # 保存all json的结果数据
         ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
+        # wqz 报错all_json_data值json文件中
         if self.save_json_data:
             ret['execute_cmd'] = testinfo['testcase']['run']
-            ret['modify_parameters'] = testinfo['configs']
+            ret['modify_parameters'] = exec_configs
             self.save_test_data_to_all_json(name, ret)
+        else:
+            print("环境信息获取失败")
 
         # 将中间结果文件导入到 excel 表格中
         #tool_name = testinfo["test_type"]
         #exec_cmd = testinfo["testcase"]["run"]
         #exec_configs= self.dumps_configs(testinfo)
 
-        if(type(exec_configs)== str):
-            self.exportxlsx.export_ret_to_xlsx(tool_name,
-                            file_path,
-                            self.current_report_file,exec_cmd,exec_configs)
-        else:
-            self.exportxlsx.export_ret_to_xlsx(tool_name,
-                            file_path,
-                            self.current_report_file,exec_cmd,None)
         return file_path
 
     def save_unixbench_detail(self, name, tinf, result):
