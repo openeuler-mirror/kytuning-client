@@ -11,9 +11,9 @@ import logging
 from .scheme import *
 from .error import *
 from .report import *
-from .getenv import EnvManager 
-from .dependency import DependencyManager 
-from .scheme import subproc_call 
+from .getenv import EnvManager
+from .dependency import DependencyManager
+from .scheme import subproc_call
 from .config import KYConfig
 
 __all__ = [ 'TestFactory', 'UnixbenchTest', 'LmbenchTest', 'TestNotFound']
@@ -139,7 +139,7 @@ class BaseTest(object):
 
     def find_and_read_result(self):
         if self.result:
-            return self.result 
+            return self.result
         return ''
 
     def _backup_result(self):
@@ -153,7 +153,7 @@ class BaseTest(object):
             if ret_path is not None and len(ret_path) > 0:
                 subproc_call("  rm -f {ret_path}/kytuning-result.xlsx;                       \
                                 ret_file=\"$(find ../results/ -name '*.xlsx' | tail -n 1)\"; \
-                                ".format(ret_path = ret_path))
+                                cp \"$ret_file\" {ret_path}/".format(ret_path = ret_path))
             break
         pass
 
@@ -171,7 +171,7 @@ class BaseTest(object):
                 self.report.save_env_data(self.report_data["env"])
             if len(self.report_data["datas"]) > 0:
                 for data in self.report_data["datas"]:
-                    self.report.save_result(data["name"], data["tinf"], data["data"], only_xlsx = True)
+                    self.report.save_result(data["name"], data["tinf"], data["data"])
         pass
 
 
@@ -196,7 +196,7 @@ class UnixbenchTest(BaseTest):
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
         if save:
-            with open(save[0],'r') as fp:
+            with open(save[0]) as fp:
                 data = fp.read()
         return data
 
@@ -223,12 +223,12 @@ class StreamTest(BaseTest):
         for item in os.listdir(tdir):
             path = '{tdir}/{item}'.format(tdir=tdir, item=item)
             stat = os.stat('{tdir}/{item}'.format(tdir=tdir, item=item))
-            if item.startswith('Single') :
+            if item.startswith('Single'):
                 s_save = self.compare_and_return_newer(s_save, (path, stat))
             else:
-                m_save = self.compare_and_return_newer(s_save, (path, stat))
+                m_save = self.compare_and_return_newer(m_save, (path, stat))
 
-        data = { 'single': None, 'multiple': None } 
+        data = { 'single': None, 'multiple': None }
         if s_save:
             with open(s_save[0], 'r') as fp:
                 data['single'] = fp.read()
@@ -276,7 +276,7 @@ class FioTest(BaseTest):
         #     with open(save) as fp:
         #         data = fp.read()
         if save:
-            with open(save[0],'r') as fp:
+            with open(save[0]) as fp:
                 data = fp.read()
         return data
 
@@ -307,7 +307,7 @@ class IoZoneTest(BaseTest):
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
         if save:
-            with open(save[0],'r') as fp:
+            with open(save[0]) as fp:
                 data = fp.read()
         return data
 
