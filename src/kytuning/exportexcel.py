@@ -11,7 +11,7 @@
 # 功能：从环境/测试结果json文件导出到excel
 # 依赖库：openpyxl
 
-__all__ = ['ExportXlsx']
+__all__ = ['Export']
 
 import os
 import re
@@ -65,7 +65,6 @@ class Unixbench(BenchMark):
         self.thread = ["单线程", "多线程"]
         self.cmd = "执行命令："
         self.modify_argv = "修改参数："
-        self.xlsx_col = self.thread
         self.cpu_num_flag = "in system; run"
         self.thread_flag = "1 parallel"
         self.read_items_flag = "BASELINE"
@@ -652,15 +651,12 @@ class Fio(BenchMark):
         return ret_dict
 
 
-class ExportXlsx(object):
+class Export(object):
     def __init__(self):
         self.env_dict = None
         self.ret_dict = None
         self.tool_name = None
         self.tool_cls = None
-
-        self.excel_name = "kytuning-result.xlsx"
-        self.jsob_name = "kytuning-result.json"
 
     @staticmethod
     def get_files(ret_path: str) -> list:
