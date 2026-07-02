@@ -145,11 +145,6 @@ class BaseTest(object):
             ret_raw_path = self.scheme.get_ret_raw_path()
             if ret_raw_path is not None and len(ret_raw_path) > 0:
                 subproc_call("cp -rf {ret_folder}/* {ret_raw_path}/".format(ret_folder=fold, ret_raw_path=ret_raw_path))
-            ret_path = self.scheme.get_ret_path()
-            if ret_path is not None and len(ret_path) > 0:
-                subproc_call("  rm -f {ret_path}/kytuning-result.xlsx;                       \
-                                ret_file=\"$(find ../results/ -name '*.xlsx' | tail -n 1)\"; \
-                                cp \"$ret_file\" {ret_path}/".format(ret_path=ret_path))
             break
         pass
 
@@ -329,7 +324,7 @@ class SpecJVM2008Test(BaseTest):
         for item in os.listdir(save[0]):
             if item.endswith('.txt') is True:
                 save_txt = '{subdir}/{item}'.format(subdir=save[0], item=item)
-        if  save_txt:
+        if save_txt:
             with open(save_txt, 'r') as fp:
                 data = fp.read()
         return data

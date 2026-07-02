@@ -30,7 +30,7 @@ class Report(object):
         self.current_raw_result_dir = None
         self.current_env_file = None
         self.current_report_file = None
-        self.exportxlsx = ExportXlsx()
+        self.export = Export()
         self.all_json_file = os.path.abspath(os.path.join(self.basepath, "../../", "all_json_file.json"))
         self.save_json_data = False
 
@@ -151,12 +151,12 @@ class Report(object):
         self.save_testcase_data(name, testinfo)
 
         # 保存json的结果数据
-        ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
+        ret = self.export.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
         print(ret)
         self.save_result_json(name, ret)
 
         # 保存all json的结果数据
-        ret = self.exportxlsx.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
+        ret = self.export.ret_to_dict(tool_name, file_path, exec_cmd, exec_configs)
         # wqz 报错all_json_data值json文件中
         if self.save_json_data:
             ret['execute_cmd'] = testinfo['testcase']['run']
