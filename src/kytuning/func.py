@@ -54,7 +54,8 @@ class FUNC(object):
             return KYConfig().get(['iozone', 'test_file'])
         return None
 
-    def func_jvm_mxmem(self):
+    def func_jvm_mxmem(self, type):
+        # type不可以去除jvm测试会调用这个接口，默认传递有参数
         mxmem = KYConfig().get(['specjvm', 'mx_mem'])
         if mxmem is not None and len(mxmem) > 0:
             return mxmem
@@ -70,7 +71,8 @@ class FUNC(object):
             return mxmem
         return None
 
-    def func_cpu2006_config(self):
+    def func_cpu2006_config(self, type):
+        # 同上
         arch_str = None
         arch = ExecCmd(command='uname -m', env=self.curenv).run()
         if arch.exit_status == 0:
@@ -93,7 +95,8 @@ class FUNC(object):
             return cpu_config
         return None
 
-    def func_cpu2017_config(self):
+    def func_cpu2017_config(self, type):
+        # 同上
         arch_str = None
         arch = ExecCmd(command='uname -m', env=self.curenv).run()
         if arch.exit_status == 0:
