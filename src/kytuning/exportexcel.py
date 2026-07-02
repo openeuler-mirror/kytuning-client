@@ -20,7 +20,6 @@ import difflib
 import argparse
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
-
 TOOL_NAME_UB = "Unixbench"
 TOOL_NAME_CPU06 = "Speccpu2006"
 TOOL_NAME_CPU17 = "Speccpu2017"
@@ -38,7 +37,6 @@ class BenchMark(object):
         self.items = None
         self.tool_name = None
         self.tool_version = None  # 暂时未使用
-
         self.sheet_env_title = "性能测试环境"
         self.index_start = 1
         self.text_cmd = "执行命令:"
@@ -285,8 +283,7 @@ class Speccpu2017(BenchMark):
                             _line = _line.split("*")
                     elif _line.count("*") == 2:
                         _line = _line.split("*")
-                    elif all(key in line for key in [
-                        "2017", "base"]):
+                    elif all(key in line for key in ["2017", "base"]):
                         _regx = r"(?<=SPEC)[a-z]*|(?<=_)[a-z]*"
                         _flag = re.findall(_regx, _line)
                         _type_rate_speed = _flag[0]
@@ -320,10 +317,8 @@ class Iozone(BenchMark):
     def __init__(self):
         super().__init__()
         self.tool_name = TOOL_NAME_IOZONE
-        self.items = {
-            "block_size": "",
-            "rw_items": ["写测试（KB/s）", "重写测试（KB/s）", "读测试（KB/s）",
-                         "重读测试（KB/s）", "随机读测试（KB/s）", "随机写测试（KB/s）"]}
+        self.items = {"block_size": "",
+                      "rw_items": ["写测试（KB/s）", "重写测试（KB/s）", "读测试（KB/s）", "重读测试（KB/s）", "随机读测试（KB/s）", "随机写测试（KB/s）"]}
 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name}
@@ -356,10 +351,7 @@ class Specjvm2008(BenchMark):
     def __init__(self):
         super().__init__()
         self.tool_name = TOOL_NAME_JVM08
-        self.items = ["compiler", "compress", "crypto",
-                      "derby", "mpegaudio", "scimark.large",
-                      "scimark.small", "serial", "startup",
-                      "sunflow", "xml",
+        self.items = ["compiler", "compress", "crypto", "derby", "mpegaudio", "scimark.large", "scimark.small", "serial", "startup", "sunflow", "xml",
                       "Noncompliant composite result"]
         self.tune = ["base", "peak"]
 
@@ -591,8 +583,7 @@ class Netperf(BenchMark):
     def __init__(self):
         super().__init__()
         self.tool_name = TOOL_NAME_NETPERF
-        self.items = ["TCP_Stream", "UDP_Stream", "网络响应时间",
-                      "TCP_CRR", "TCP_RR", "UDP_RR"]
+        self.items = ["TCP_Stream", "UDP_Stream", "网络响应时间", "TCP_CRR", "TCP_RR", "UDP_RR"]
 
     def ret_to_dict(self, file: str):
         ret_dict = {"tool_name": self.tool_name}
@@ -692,8 +683,7 @@ class ExportXlsx(object):
             tool_name, list(cls_dict.keys()), 1)
         return cls_dict.get(match_names[0])()
 
-    def ret_to_dict(
-            self, tool_name: str, ret_path: str, cmd: str, argv: str) -> list:
+    def ret_to_dict(self, tool_name: str, ret_path: str, cmd: str, argv: str) -> list:
         """结果解析转化为字典"""
         ret_dict = {}
         _tool_name = tool_name
@@ -707,8 +697,7 @@ class ExportXlsx(object):
         self.tool_cls.tool_name = _tool_name
         return self.tool_cls.ret_to_dict(_ret_path)
 
-    def rets_to_dict_list(
-            self, tool_name: str, ret_path: str, cmd: str, argv: str) -> list:
+    def rets_to_dict_list(self, tool_name: str, ret_path: str, cmd: str, argv: str) -> list:
         ret_dict_list = []
         for file in self.get_files(ret_path):
             ret_dict = self.ret_to_dict(tool_name, file, cmd, argv)
@@ -729,5 +718,3 @@ def constructParse():
     parser.add_argument('-f', '--file', help='absolute path of benchmark raw result.', type=str)
     parser.add_argument('-o', '--output', help='the dir where we export excel to.', default=os.getcwd(), type=str)
     return parser
-
-

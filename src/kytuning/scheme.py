@@ -162,8 +162,7 @@ class TestCase(object):
         for item in self.configs:
             try:
                 item.setup()
-                logging.info("testcase({name})->setup({cmd}) done".format(
-                    name=self.name, cmd=item.setup_cmd))
+                logging.info("testcase({name})->setup({cmd}) done".format(name=self.name, cmd=item.setup_cmd))
             except TestConfigError as e:
                 logging.error("testcase({name})->setup({cmd}) error[{code}]".format(name=self.name, cmd=item.setup_cmd, code=e.code))
                 raise TestCaseError("testcase({name})->setup({cmd}) error[{code}]".format(name=self.name, cmd=item.setup_cmd, code=e.code))

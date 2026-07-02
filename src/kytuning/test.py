@@ -265,11 +265,6 @@ class FioTest(BaseTest):
             else:
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
-        # for item in os.listdir(save[0]):
-        #     save = '{subdir}/{item}'.format(subdir=save[0], item=item)
-        # if save:
-        #     with open(save) as fp:
-        #         data = fp.read()
         if save:
             with open(save[0], 'r') as fp:
                 data = fp.read()
@@ -334,7 +329,7 @@ class SpecJVM2008Test(BaseTest):
         for item in os.listdir(save[0]):
             if item.endswith('.txt') is True:
                 save_txt = '{subdir}/{item}'.format(subdir=save[0], item=item)
-        if save_txt:
+        if  save_txt:
             with open(save_txt, 'r') as fp:
                 data = fp.read()
         return data
@@ -365,9 +360,6 @@ class SpecCPU2006Test(BaseTest):
                     save = (path, stat)
                     filenameinfo = item.split('.')
                     fileseq = filenameinfo[1]
-        # if save:
-        #     with open(save[0]) as fp:
-        #         data = fp.read()
         data = {'int': "", 'fp': ""}
         if save:
             for item in os.listdir(tdir):
@@ -426,11 +418,6 @@ class SpecCPU2017Test(BaseTest):
                     with open(path, 'r') as fp:
                         data['fpspeed'] = fp.read()
         return json.dumps(data)
-        # print(save)
-        # if save:
-        #     with open(save[0]) as fp:
-        #         data = fp.read()
-        # return data
 
 
 class TestFactory(object):
@@ -453,7 +440,6 @@ class TestFactory(object):
         with open(path, 'r') as f:
             scheme = SchemeParser().parse(f)
             scheme.prepare()
-
             key = scheme.get_test_type()
             if key:
                 test = self.__data.get(key.lower())
