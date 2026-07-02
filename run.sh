@@ -112,8 +112,8 @@ function download() {
         fi
         ;;
     fio)
-        if [ ! -f ${tools_path}/fio-3.20.tar.bz2 ]; then
-            ${WGET_BIN} ${tools_path} ${tools_server_url}fio-3.20.tar.bz2
+        if [ ! -f ${tools_path}/fio-3.32.tar.bz2 ]; then
+            ${WGET_BIN} ${tools_path} ${tools_server_url}fio-3.32.tar.bz2
         fi
         ;;
     iozone)
@@ -164,7 +164,7 @@ install_dependencies() {
     local packages_manager_install=""
     local rk_benchmark=$@
     declare -A packages_dict ## keys:benchmark values:packages
-    packages_dict[all_dep]="python3 lshw"
+    packages_dict[all_dep]="python3 python3-pip lshw"
 
     if [[ ${rk_benchmark} == *unixbench* ]]; then
         packages_dict[unixbench]="perl-Time-HiRes"
@@ -186,7 +186,7 @@ install_dependencies() {
     if [ `command -v yum` ];then
         packages_manager="rpm -q"
         packages_manager_install="yum"
-        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"
+        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="libnsl ${packages_dict[all_dep]}"
     elif [ `command -v apt-get` ];then
         packages_manager="dpkg -s"
         packages_manager_install="sudo apt-get"
@@ -196,7 +196,7 @@ install_dependencies() {
         if [[ "${packages_dict[jvm2008]}x" != "x" ]]; then
             packages_dict[jvm2008]="openjdk-8-jre-headless"
         fi
-        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"
+        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="libnsl ${packages_dict[all_dep]}"
     fi
 
     for package in ${packages_dict[@]}; do
@@ -210,11 +210,11 @@ install_dependencies() {
     done
 
     # install python modules
-    echo -n "安装Python模块,进入目录:"
-    pushd $cur_path/pydeps
-    bash install.sh
-    echo -n "安装Python模块完成,返回目录:"
-    popd
+    sudo pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+    if [ $? -ne 0 ]; then
+        echo "PIP dependency package installation failed"
+        exit 1
+    fi
 }
 
 # 运行业务, 接受1个参数或2个参数
