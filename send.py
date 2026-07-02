@@ -1,6 +1,6 @@
 """
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: liyl_kl <liyulong@kylinos.cn>
  * Date: Fri Mar 1 15:05:49 2024 +0800
@@ -39,6 +39,7 @@ config = dict(matches)
 # 获取对应的键值
 rk_benchmark = config.get('rk_benchmark')
 project_name = config.get('project_name')
+project_message = config.get('project_message')
 username = config.get('username')
 password = config.get('password')
 token = config.get('token')
@@ -60,6 +61,7 @@ with open(json_file, 'r') as f:
         # 向 Python 对象中添加新的键值对
         data['user_name'] = username
         data['project_name'] = project_name
+        data['project_message'] = project_message
         data['test_case_id'] = test_case_id
         # 将 Python 对象编码为新的 JSON 字符串
         new_json_data = json.dumps(data)
