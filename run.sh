@@ -3,7 +3,6 @@
 source conf/kytuning.cfg
 ARCH=$(arch)
 WGET_BIN="wget -c -P"
-UPLOAD="true"
 
 # 本文件使用的变量
 base_dir=
@@ -19,19 +18,19 @@ opt_use_net=
 function init() {
     base_dir=`grep base_path conf/kytuning.yaml |cut -d':' -f 2|sed 's/\"//g'`
     run_dir=$base_dir/run
-    
+
     cur_path=$(cd $(dirname $0); pwd)
     tools_path=$cur_path/tools
 
     if [ ! -d ${tools_path} ]; then
-        mkdir ${tools_path} 
+        mkdir ${tools_path}
     fi
     file1="$base_dir/all_json_file.json"
     if [  -f $file1 ];then
         file2="$base_dir/all_json_file-"`date +"%Y%m%d%H%M%S"`".json"
         mv $base_dir/all_json_file.json $file2
     fi
-    
+
     opt_use_net=0
 }
 
@@ -41,11 +40,11 @@ function usage() {
     $0
     不带参数运行,默认从网络上下载benchmark工具包
 
-    $0 -f filename 
+    $0 -f filename
         指定benchmark工具包文件,指定后将不会从网络下载benchmark工具
 
     $0 -h
-        显示本帮助" 
+        显示本帮助"
 }
 
 # 解析命令行参数
@@ -62,13 +61,13 @@ function parse_cmd() {
             exit 0
             ;;
         *)
-            usage    
+            usage
             exit 1
             ;;
         esac
     done
-    usage 
-    exit 1    
+    usage
+    exit 1
 }
 
 # 下载lmbench.tar cpu2006.tar cpu2017.tar jvm2008.tar需要单独处理
@@ -83,14 +82,14 @@ function handle_single_benchmark() {
         echo "下载${var_file}失败"
         exit 1
     fi
-    
+
     tar xvf ${var_path}/${var_file} -C ${var_path}
     if [ $? -eq 0 ]; then
-        rm -f ${var_path}/${var_file}    
+        rm -f ${var_path}/${var_file}
     else
         echo "解包文件失败：${var_path}/${var_file}"
         exit 1
-    fi 
+    fi
 }
 
 # 从网络下载benchmark工具，接受一个参数
@@ -98,28 +97,28 @@ function download() {
     local benchmark=$1
     case ${benchmark} in
     unixbench)
-        if [ ! -f ${tools_path}/unixbench-5.1.3.tar.gz ]; then
-            ${WGET_BIN} ${tools_path} ${tools_unixbench_url}
+        if [ ! -f ${tools_path}/UnixBench5.1.3-1.tar.gz ]; then
+            ${WGET_BIN} ${tools_path} ${tools_server_url}UnixBench5.1.3-1.tar.gz
         fi
         ;;
     lmbench)
-        if [ ! -f ${tools_path}/lmbench3.tar.gz ]; then
-            ${WGET_BIN} ${tools_path} ${tools_lmbench_url}
+        if [ ! -f ${tools_path}/lmbench-3.0-a9-2.tar.bz2 ]; then
+            handle_single_benchmark ${tools_path} lmbench.tar "${tools_server_url}"
         fi
         ;;
     stream)
-        if [ ! -f ${tools_path}/stream-5.10.tar.gz ]; then
-            ${WGET_BIN} ${tools_path} -O ${tools_path}/stream-5.10.tar.gz ${tools_stream_url}
+        if [ ! -f ${tools_path}/stream-5.9-1.tar.bz2 ]; then
+            ${WGET_BIN} ${tools_path} ${tools_server_url}stream-5.9-1.tar.bz2
         fi
         ;;
     fio)
-        if [ ! -f ${tools_path}/fio-3.34.tar.bz2 ]; then
-            ${WGET_BIN} ${tools_path} ${tools_fio_url}
+        if [ ! -f ${tools_path}/fio-3.20.tar.bz2 ]; then
+            ${WGET_BIN} ${tools_path} ${tools_server_url}fio-3.20.tar.bz2
         fi
         ;;
     iozone)
-        if [ ! -f ${tools_path}/iozone3_490.tar ]; then
-            ${WGET_BIN} ${tools_path} ${tools_iozone_url}
+        if [ ! -f ${tools_path}/iozone3_430.tar ]; then
+            ${WGET_BIN} ${tools_path} ${tools_server_url}iozone3_430.tar
         fi
         ;;
     cpu2006)
@@ -140,11 +139,6 @@ function download() {
             handle_single_benchmark ${tools_path} jvm2008.tar "${tools_server_url}"
         fi
         ;;
-    netperf)
-        if [ ! -f ${tools_path}/netperf-2.7.0.tar.gz ]; then
-            ${WGET_BIN} ${tools_path} ${tools_netperf_url}
-        fi
-        ;;
     *)
         echo "无法下载${benchmark}, 目前尚未支持该工具"
         exit 1
@@ -155,7 +149,7 @@ function download() {
 # 解压指定的本地benchmark工具包，
 # 如果在命令行中使用-f制定了本地文件，或者在kytuning.cfg配置了本地文件，调用该函数处理
 function handle_tarfile() {
-    tar xv --skip-old-files -f $1  
+    tar xv --skip-old-files -f $1
     tar -xvf ${tools_path}/lmbench.tar -C ${tools_path}
     tar -xvf ${tools_path}/cpu2006.tar -C ${tools_path}
     tar -xvf ${tools_path}/cpu2017.tar -C ${tools_path}
@@ -178,6 +172,9 @@ install_dependencies() {
     if [[ ${rk_benchmark} == *lmbench* ]]; then
         packages_dict[lmbench]="expect libtirpc-devel"
     fi
+    if [[ ${rk_benchmark} == *fio* ]]; then
+        packages_dict[unixbench]="libaio-devel"
+    fi
     if [[ ${rk_benchmark} == *jvm2008* ]]; then
         packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
     fi
@@ -189,7 +186,7 @@ install_dependencies() {
     if [ `command -v yum` ];then
         packages_manager="rpm -q"
         packages_manager_install="yum"
-        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"    
+        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"
     elif [ `command -v apt-get` ];then
         packages_manager="dpkg -s"
         packages_manager_install="sudo apt-get"
@@ -199,9 +196,9 @@ install_dependencies() {
         if [[ "${packages_dict[jvm2008]}x" != "x" ]]; then
             packages_dict[jvm2008]="openjdk-8-jre-headless"
         fi
-        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"    
+        test ${opt_use_net} -eq 1 && packages_dict[all_dep]="python3-pip libnsl ${packages_dict[all_dep]}"
     fi
-    
+
     for package in ${packages_dict[@]}; do
         if ! $packages_manager $package > /dev/null; then
             $packages_manager_install install -y $package
@@ -213,6 +210,11 @@ install_dependencies() {
     done
 
     # install python modules
+    echo -n "安装Python模块,进入目录:"
+    pushd $cur_path/pydeps
+    bash install.sh
+    echo -n "安装Python模块完成,返回目录:"
+    popd
 }
 
 # 运行业务, 接受1个参数或2个参数
@@ -220,7 +222,7 @@ install_dependencies() {
 # 参数2，非必须，本地benchmark工具包文件
 function run() {
     local testlist=$1
-    local localfile=$2        
+    local localfile=$2
     # 下载benchmark工具或使用本地benchmark工具包文件
     if [ $localfile ]; then
         opt_use_net=0
@@ -234,10 +236,10 @@ function run() {
         for bc in ${testlist}; do
             echo 下载 ${bc}
             download ${bc}
-        done    
-    fi        
-    
-    # 安装benchmark工具到/root/kytuning目录，实际上只是建立一个链接 
+        done
+    fi
+
+    # 安装benchmark工具到/root/kytuning目录，实际上只是建立一个链接
     if [ ! -e $base_dir/tools ]; then
         mkdir $base_dir
         ln -sf $tools_path $base_dir/tools
@@ -250,7 +252,7 @@ function run() {
         cd $cur_path
         if [[ ${bc} == "cpu2006" && ${ARCH} == "loongarch64" ]]; then
               bc=${bc}-${ARCH}
-        fi 
+        fi
         if [ -f $cur_path/yaml-base/$bc-base.yaml ]; then
             python3 $cur_path/src/kytuning.py $cur_path/yaml-base/$bc-base.yaml
             sync
@@ -260,14 +262,14 @@ function run() {
     done
 }
 
-    
+
 # 程序入口
 function main() {
     init
 
     if [ $# -eq 0 ]; then
-        run "$rk_benchmark"
         json_file="$base_dir/all_json_file.json"
+        run "$rk_benchmark"
         if [ $# -eq 0 ] && [ -f $json_file ]; then
             sed -i 's/NR\/RE//g' $base_dir/all_json_file.json
             sed -i 's/": "default"/": ""/g' $base_dir/all_json_file.json
