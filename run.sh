@@ -180,7 +180,7 @@ install_dependencies() {
     fi
     if [[ ${rk_benchmark} == *cpu20* ]]; then
         packages_dict[cpu20xx]="gcc-c++ gcc-gfortran"
-        test ! -e /lib64/libnsl.so.1 && test ${opt_use_net} -eq 0 && ln -sf /lib64/libnsl.so.2 /lib64/libnsl.so.1
+        test ! -e /lib64/libnsl.so.1 && test ${opt_use_net} -eq 0 && ln -sf $(ls -1 /lib64/libnsl.so.* | head -n 1) /lib64/libnsl.so.1
     fi
 
     if [ `command -v yum` ];then
