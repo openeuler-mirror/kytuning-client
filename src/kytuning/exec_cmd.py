@@ -12,11 +12,9 @@ import os
 import sys
 import time
 import subprocess
-import signal
 import select
 import traceback
 from .logger import *
-
 
 
 class CommandResult(object):
@@ -40,9 +38,7 @@ class CommandResult(object):
                 "STDOUT: %s\n"
                 "STDERR: %s\n"
                 "STACK: %s\n"
-                % (self.command, self.exit_status, self.duration,
-                    self.stdout, self.stderr, self.stack)
-                )
+                % (self.command, self.exit_status, self.duration, self.stdout, self.stderr, self.stack))
 
 
 class ExecCmd(object):
@@ -55,7 +51,7 @@ class ExecCmd(object):
         print(result.stderr)
     """
 
-    def __init__(self, command, timeout=None,  env=None, muted=False):
+    def __init__(self, command, timeout=None, env=None, muted=False):
         self.command = command
         self.result = CommandResult(command)
         self.env = env
@@ -78,7 +74,6 @@ class ExecCmd(object):
                 preexec_fn=os.setpgid(0, 0),
                 env=self.env)
 
-
     def save_output(self, isstdout):
         data = self.read_output(isstdout)
         if isstdout is True:
@@ -86,7 +81,6 @@ class ExecCmd(object):
         else:
             self.result.stderr = self.result.stderr + data
             self.result.stdout = self.result.stdout + data
-
 
     def run(self):
         if self.sp is None:
@@ -101,7 +95,7 @@ class ExecCmd(object):
         while not self.timeout or time_left > 0:
             readlist = [self.sp.stdout, self.sp.stderr]
             read_ready, _, _ = select.select(readlist, [], [], 1)
-            
+
             if self.sp.stdout in read_ready:
                 self.save_output(True)
 
@@ -125,9 +119,7 @@ class ExecCmd(object):
         if self.result.exit_status > 0:
             logging.debug(self.result)
             logging.debug(traceback.extract_stack())
-
         return self.result
-
 
     def read_output(self, isstdout):
         if isstdout:
@@ -145,9 +137,7 @@ class ExecCmd(object):
             if bufferline == "":
                 break
             data += bufferline
-
         return data
-
 
     def __enter__(self):
         return self
@@ -160,6 +150,6 @@ class ExecCmd(object):
 
 
 if __name__ == '__main__':
-    e = ExecCmd(command='ls /itmp', env = dict(os.environ, LC_ALL="C"))
-    result = e.run();
+    e = ExecCmd(command='ls /itmp', env=dict(os.environ, LC_ALL="C"))
+    result = e.run()
     print(result)

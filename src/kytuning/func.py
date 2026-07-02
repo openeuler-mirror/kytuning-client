@@ -8,9 +8,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys,os
+import os
 from .exec_cmd import ExecCmd
 from .config import KYConfig
+
 
 class FUNC(object):
     def __init__(self):
@@ -26,7 +27,7 @@ class FUNC(object):
             "FUNC_CPU2006_CONFIG": self.func_cpu2006_config,
             # speccpu2017
             "FUNC_CPU2017_CONFIG": self.func_cpu2017_config,
-            }
+        }
         pass
 
     # FUNC_THREAD_NUM
@@ -34,7 +35,7 @@ class FUNC(object):
         if type == 'single':
             return '1'
         elif type == 'multi':
-            result = ExecCmd(command = 'cat /proc/cpuinfo| grep "processor"| wc -l', env = self.curenv).run()
+            result = ExecCmd(command='cat /proc/cpuinfo| grep "processor"| wc -l', env=self.curenv).run()
             if result.exit_status == 0:
                 return result.stdout.strip()
         return None
@@ -60,7 +61,7 @@ class FUNC(object):
         ## 获取物理内存，单位为字节
         mxmem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
         ## 转化为MB
-        mxmem = mxmem / (1024 ** 2) 
+        mxmem = mxmem / (1024 ** 2)
         ## 取2/3的内存
         mxmem = int(mxmem * 2 / 3)
         ## 转化成字符串
@@ -71,7 +72,7 @@ class FUNC(object):
 
     def func_cpu2006_config(self, type):
         arch_str = None
-        arch = ExecCmd(command = 'uname -m', env = self.curenv).run()
+        arch = ExecCmd(command='uname -m', env=self.curenv).run()
         if arch.exit_status == 0:
             arch_str = arch.stdout.strip()
         if arch_str is None:
@@ -94,7 +95,7 @@ class FUNC(object):
 
     def func_cpu2017_config(self, type):
         arch_str = None
-        arch = ExecCmd(command = 'uname -m', env = self.curenv).run()
+        arch = ExecCmd(command='uname -m', env=self.curenv).run()
         if arch.exit_status == 0:
             arch_str = arch.stdout.strip()
         if arch_str is None:

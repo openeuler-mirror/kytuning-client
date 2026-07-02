@@ -9,18 +9,19 @@ import os
 import json
 import logging
 from .scheme import *
-from .error import *
 from .report import *
 from .getenv import EnvManager
 from .dependency import DependencyManager
 from .scheme import subproc_call
 from .config import KYConfig
 
-__all__ = [ 'TestFactory', 'UnixbenchTest', 'LmbenchTest', 'TestNotFound']
+__all__ = ['TestFactory', 'UnixbenchTest', 'LmbenchTest', 'TestNotFound']
+
 
 class TestNotFound(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
+
 
 class BaseTest(object):
     def __init__(self, scheme=None):
@@ -29,7 +30,7 @@ class BaseTest(object):
         self.depmgr = None
         self.report = None
         self.result = None
-        self.result_folder = [] # ["./results", "./result"]
+        self.result_folder = []  # ["./results", "./result"]
         self.report_data = {"env": None, "env_export": False, "datas": []}
 
     def __str__(self):
@@ -86,16 +87,14 @@ class BaseTest(object):
             tcase.build()
             maxit = self.scheme.get_maxiterations()
             for idx in range(maxit):
-                logging.info("###### run testcase\'s {idx}/{maxit} times...".format(idx=idx+1, maxit=maxit))
-
+                logging.info("###### run testcase\'s {idx}/{maxit} times...".format(idx=idx + 1, maxit=maxit))
                 self.result = tcase.run()
                 name = '{name}-{idx}'.format(name=tcase.name, idx=idx)
                 tinf = self.scheme.to_data()
                 tinf['testcase'] = tcase.to_data()
                 data = self.find_and_read_result()
                 self._export_result({"name": name, "tinf": tinf, "data": data})
-
-                logging.info("###### run testcase\'s {idx}/{maxit} times done".format(idx=idx+1, maxit=maxit))
+                logging.info("###### run testcase\'s {idx}/{maxit} times done".format(idx=idx + 1, maxit=maxit))
         except TestCaseError as e:
             logging.error(e)
             raise e
@@ -115,12 +114,9 @@ class BaseTest(object):
         for tidx in range(total):
             if self._check_testcase(self.scheme.testcases[tidx]) is not True:
                 continue
-
-            logging.info("#### run {tidx}/{total} testcase start".format(tidx=tidx+1, total=total))
-
+            logging.info("#### run {tidx}/{total} testcase start".format(tidx=tidx + 1, total=total))
             self._do_testcase(self.scheme.testcases[tidx])
-
-            logging.info("#### run {tidx}/{total} testcase done".format(tidx=tidx+1, total=total))
+            logging.info("#### run {tidx}/{total} testcase done".format(tidx=tidx + 1, total=total))
         pass
 
     def do_test(self):
@@ -148,12 +144,12 @@ class BaseTest(object):
                 continue
             ret_raw_path = self.scheme.get_ret_raw_path()
             if ret_raw_path is not None and len(ret_raw_path) > 0:
-                subproc_call("cp -rf {ret_folder}/* {ret_raw_path}/".format(ret_folder = fold, ret_raw_path = ret_raw_path))
+                subproc_call("cp -rf {ret_folder}/* {ret_raw_path}/".format(ret_folder=fold, ret_raw_path=ret_raw_path))
             ret_path = self.scheme.get_ret_path()
             if ret_path is not None and len(ret_path) > 0:
                 subproc_call("  rm -f {ret_path}/kytuning-result.xlsx;                       \
                                 ret_file=\"$(find ../results/ -name '*.xlsx' | tail -n 1)\"; \
-                                cp \"$ret_file\" {ret_path}/".format(ret_path = ret_path))
+                                cp \"$ret_file\" {ret_path}/".format(ret_path=ret_path))
             break
         pass
 
@@ -164,7 +160,7 @@ class BaseTest(object):
         self.report.save_result(data["name"], data["tinf"], data["data"])
         self.report_data["datas"].append(data)
 
-    def export(self, rpath = None):
+    def export(self, rpath=None):
         if rpath is not None:
             self.report.current_report_file = rpath
             if self.report_data["env"]:
@@ -196,7 +192,7 @@ class UnixbenchTest(BaseTest):
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
         if save:
-            with open(save[0]) as fp:
+            with open(save[0], 'r') as fp:
                 data = fp.read()
         return data
 
@@ -226,9 +222,9 @@ class StreamTest(BaseTest):
             if item.startswith('Single'):
                 s_save = self.compare_and_return_newer(s_save, (path, stat))
             else:
-                m_save = self.compare_and_return_newer(m_save, (path, stat))
+                m_save = self.compare_and_return_newer(s_save, (path, stat))
 
-        data = { 'single': None, 'multiple': None }
+        data = {'single': None, 'multiple': None}
         if s_save:
             with open(s_save[0], 'r') as fp:
                 data['single'] = fp.read()
@@ -246,7 +242,6 @@ class LmbenchTest(BaseTest):
     def find_and_read_result(self):
         data = ''
         tres = './results/summary.out'
-
         if os.access(tres, os.R_OK):
             with open(tres, 'r') as fp:
                 data = fp.read()
@@ -276,7 +271,7 @@ class FioTest(BaseTest):
         #     with open(save) as fp:
         #         data = fp.read()
         if save:
-            with open(save[0]) as fp:
+            with open(save[0], 'r') as fp:
                 data = fp.read()
         return data
 
@@ -307,7 +302,7 @@ class IoZoneTest(BaseTest):
                 if stat.st_mtime >= save[1].st_mtime:
                     save = (path, stat)
         if save:
-            with open(save[0]) as fp:
+            with open(save[0], 'r') as fp:
                 data = fp.read()
         return data
 
@@ -338,10 +333,9 @@ class SpecJVM2008Test(BaseTest):
 
         for item in os.listdir(save[0]):
             if item.endswith('.txt') is True:
-                save = '{subdir}/{item}'.format(subdir=save[0], item=item)
-
-        if save:
-            with open(save) as fp:
+                save_txt = '{subdir}/{item}'.format(subdir=save[0], item=item)
+        if save_txt:
+            with open(save_txt, 'r') as fp:
                 data = fp.read()
         return data
 
@@ -374,16 +368,16 @@ class SpecCPU2006Test(BaseTest):
         # if save:
         #     with open(save[0]) as fp:
         #         data = fp.read()
-        data = { 'int': "", 'fp': "" } 
+        data = {'int': "", 'fp': ""}
         if save:
             for item in os.listdir(tdir):
                 if item.endswith(".txt") is False:
                     continue
-                path = '{tdir}/{item}'.format(tdir=tdir,item=item)
-                if item.startswith('CINT2006.'+str(fileseq)):
+                path = '{tdir}/{item}'.format(tdir=tdir, item=item)
+                if item.startswith('CINT2006.' + str(fileseq)):
                     with open(path, 'r') as fp:
                         data['int'] = fp.read()
-                if item.startswith('CFP2006.'+str(fileseq)):
+                if item.startswith('CFP2006.' + str(fileseq)):
                     with open(path, 'r') as fp:
                         data['fp'] = fp.read()
         return json.dumps(data)
@@ -413,22 +407,22 @@ class SpecCPU2017Test(BaseTest):
                     save = (path, stat)
                     filenameinfo = item.split('.')
                     fileseq = filenameinfo[1]
-        data = { 'intrate': "", 'intspeed': "",'fprate': "", 'fpspeed': "" }
-        if save: 
+        data = {'intrate': "", 'intspeed': "", 'fprate': "", 'fpspeed': ""}
+        if save:
             for item in os.listdir(tdir):
                 if item.endswith(".txt") is False:
                     continue
-                path = '{tdir}/{item}'.format(tdir=tdir,item=item)
-                if item.startswith('CPU2017.'+str(fileseq)+'.intrate'):
+                path = '{tdir}/{item}'.format(tdir=tdir, item=item)
+                if item.startswith('CPU2017.' + str(fileseq) + '.intrate'):
                     with open(path, 'r') as fp:
                         data['intrate'] = fp.read()
-                if item.startswith('CPU2017.'+str(fileseq)+'.intspeed'):
+                if item.startswith('CPU2017.' + str(fileseq) + '.intspeed'):
                     with open(path, 'r') as fp:
                         data['intspeed'] = fp.read()
-                if item.startswith('CPU2017.'+str(fileseq)+'.fprate'):
+                if item.startswith('CPU2017.' + str(fileseq) + '.fprate'):
                     with open(path, 'r') as fp:
                         data['fprate'] = fp.read()
-                if item.startswith('CPU2017.'+str(fileseq)+'.fpspeed'):
+                if item.startswith('CPU2017.' + str(fileseq) + '.fpspeed'):
                     with open(path, 'r') as fp:
                         data['fpspeed'] = fp.read()
         return json.dumps(data)
@@ -436,27 +430,28 @@ class SpecCPU2017Test(BaseTest):
         # if save:
         #     with open(save[0]) as fp:
         #         data = fp.read()
-        #return data
+        # return data
+
 
 class TestFactory(object):
-    __data = { 
-                'unixbench' : UnixbenchTest, 
-                'lmbench' : LmbenchTest,
-                'fio' : FioTest,
-                'iozone' : IoZoneTest,
-                'stream' : StreamTest,
-                'specjvm2008' : SpecJVM2008Test,
-                'speccpu2006' : SpecCPU2006Test,
-                'speccpu2017' : SpecCPU2017Test,
-                'netperf'   : NetPerfTest,
-            }
+    __data = {
+        'unixbench': UnixbenchTest,
+        'lmbench': LmbenchTest,
+        'fio': FioTest,
+        'iozone': IoZoneTest,
+        'stream': StreamTest,
+        'specjvm2008': SpecJVM2008Test,
+        'speccpu2006': SpecCPU2006Test,
+        'speccpu2017': SpecCPU2017Test,
+        'netperf': NetPerfTest,
+    }
 
     def __init__(self):
         pass
 
     def get(self, path):
-        with open(path, 'r') as f: 
-            scheme = SchemeParser().parse(f) 
+        with open(path, 'r') as f:
+            scheme = SchemeParser().parse(f)
             scheme.prepare()
 
             key = scheme.get_test_type()
@@ -466,4 +461,3 @@ class TestFactory(object):
                     return test(scheme)
             raise TestNotFound("no test named \'%s\'" % key)
         raise TestNotFound("file open failed \'%s\'" % path)
-
