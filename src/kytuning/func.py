@@ -54,7 +54,7 @@ class FUNC(object):
             return KYConfig().get(['iozone', 'test_file'])
         return None
 
-    def func_jvm_mxmem(self, type):
+    def func_jvm_mxmem(self):
         mxmem = KYConfig().get(['specjvm', 'mx_mem'])
         if mxmem is not None and len(mxmem) > 0:
             return mxmem
@@ -70,7 +70,7 @@ class FUNC(object):
             return mxmem
         return None
 
-    def func_cpu2006_config(self, type):
+    def func_cpu2006_config(self):
         arch_str = None
         arch = ExecCmd(command='uname -m', env=self.curenv).run()
         if arch.exit_status == 0:
@@ -93,7 +93,7 @@ class FUNC(object):
             return cpu_config
         return None
 
-    def func_cpu2017_config(self, type):
+    def func_cpu2017_config(self):
         arch_str = None
         arch = ExecCmd(command='uname -m', env=self.curenv).run()
         if arch.exit_status == 0:

@@ -11,6 +11,7 @@
 import os
 from .exec_cmd import ExecCmd
 
+
 class DependencyError(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
@@ -19,37 +20,29 @@ class DependencyError(Exception):
 class DependencyManager(object):
     env = dict(os.environ, LC_ALL="C")
 
-    def __init__(self, rpmlist = []):
+    def __init__(self, rpmlist=[]):
         self.rpmlist = rpmlist
-
-        # already install, dont install again
+        # already instal, dont install again
         self.dont_install = []
-
         # not install, need  to install
         self.need_install = []
-
         # install success
         self.succ_install = []
-
         # install failed
         self.fail_install = []
-
         # uninstall success
         self.succ_uninstall = []
-
         # uninstall failed
         self.fail_uninstall = []
-
         if rpmlist == None:
             return
 
         for rpm in rpmlist:
             installed = self.check_install(rpm)
             if installed == True:
-                self.dont_install.append(str(rpm))
+                self.dont_install.append(rpm)
             else:
-                self.need_install.append(str(rpm))
-
+                self.need_install.append(rpm)
 
     def install_once(self, rpm=None):
         """
@@ -61,9 +54,8 @@ class DependencyManager(object):
             return False
 
         cmd = 'yum -y install ' + rpm
-        result = ExecCmd(command = cmd, env = self.env).run()
+        result = ExecCmd(command=cmd, env=self.env).run()
         return 0 if result.exit_status == 0 else 1
-
 
     def install(self) -> list:
         """
@@ -71,11 +63,11 @@ class DependencyManager(object):
         :return:
         """
         for rpm in self.need_install:
-           result =  self.install_once(rpm)
-           if result == 0:
-               self.succ_install.append(str(rpm))
-           else:
-               self.fail_install.append(str(rpm))
+            result = self.install_once(rpm)
+            if result == 0:
+                self.succ_install.append(str(rpm))
+            else:
+                self.fail_install.append(str(rpm))
 
         if len(self.fail_install) > 0:
             # environment recovery
@@ -83,7 +75,6 @@ class DependencyManager(object):
             raise DependencyError("Dependency install failed:" + str(self.fail_install))
 
         return self.succ_install
-
 
     def uninstall_once(self, rpm):
         """
@@ -95,9 +86,8 @@ class DependencyManager(object):
             return False
 
         cmd = 'yum -y remove ' + rpm
-        result = ExecCmd(command = cmd, env = self.env).run()
+        result = ExecCmd(command=cmd, env=self.env).run()
         return 0 if result.exit_status == 0 else 1
-
 
     def uninstall_norecord(self):
         """
@@ -106,9 +96,8 @@ class DependencyManager(object):
         """
         for rpm in self.succ_install[::-1]:
             result = self.uninstall_once(rpm)
-        
 
-    def uninstall(self) :
+    def uninstall(self):
         """
         卸载软件列表
         :return:
@@ -119,12 +108,9 @@ class DependencyManager(object):
                 self.succ_uninstall.append(str(rpm))
             else:
                 self.fail_uninstall.append(str(rpm))
-                
         if len(self.fail_uninstall) > 0:
             raise DependencyError("Dependency uninstall failed:" + str(self.fail_uninstall))
-
         return self.succ_uninstall
-
 
     def check_install(self, rpm):
         """
@@ -133,11 +119,10 @@ class DependencyManager(object):
         :return:
         """
         cmd = "rpm -qa  --queryformat '%{name}' " + rpm
-        result = ExecCmd(command = cmd, env = self.env).run()
+        result = ExecCmd(command=cmd, env=self.env).run()
 
         '''
-        If the result.stdout is not empty, 
-        it means that the software package has been installed
+        If the result.stdout is not empty,  it means that the software package has been installed
         '''
         if result.exit_status == 0 and len(result.stdout) > 0:
             return True
@@ -151,13 +136,10 @@ if __name__ == "__main__":
         install = dep.install()
     except Exception as e:
         print(e.args)
-
     uninstall = dep.uninstall()
-
     print("dont install: ", dep.dont_install)
     print("need install: ", dep.need_install)
     print("succ install: ", dep.succ_install)
     print("fail install: ", dep.fail_install)
-
     print("succ uninstall: ", dep.succ_uninstall)
     print("fail uninstall: ", dep.fail_uninstall)
