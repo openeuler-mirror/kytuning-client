@@ -210,7 +210,7 @@ install_dependencies() {
     done
 
     # install python modules
-    sudo pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+    sudo pip3 install -r requirements.txt -i $pip_url
     if [ $? -ne 0 ]; then
         echo "PIP dependency package installation failed"
         exit 1
