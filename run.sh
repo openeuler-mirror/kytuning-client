@@ -192,6 +192,9 @@ install_dependencies() {
         if [[ "${packages_dict[jvm2008]}x" != "x" ]]; then
             packages_dict[jvm2008]="openjdk-8-jre-headless"
         fi
+        if [[ "${packages_dict[fio]}x" != "x" ]]; then
+            packages_dict[fio]="libaio-dev"
+        fi
         test ${opt_use_net} -eq 1 && packages_dict[all_dep]="libnsl ${packages_dict[all_dep]}"
     fi
 
