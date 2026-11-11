@@ -56,10 +56,6 @@ function parse_cmd() {
             run "$rk_benchmark" $OPTARG
             exit 0
             ;;
-        v)
-            usage
-            exit 0
-            ;;
         *)
             usage
             exit 1
@@ -173,7 +169,7 @@ install_dependencies() {
         packages_dict[lmbench]="expect libtirpc-devel"
     fi
     if [[ ${rk_benchmark} == *fio* ]]; then
-        packages_dict[unixbench]="libaio-devel"
+        packages_dict[fio]="libaio-devel"
     fi
     if [[ ${rk_benchmark} == *jvm2008* ]]; then
         packages_dict[jvm2008]="java-1.8.0-openjdk-devel"
